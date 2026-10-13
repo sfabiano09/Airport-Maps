@@ -1,0 +1,1408 @@
+{
+ "airports": {
+  "ABQ": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 24,
+    "ground": 48,
+    "food": 24,
+    "restroom": 23,
+    "landmark": 1
+   },
+   "overture": true,
+   "walkNodes": 8102
+  },
+  "ALB": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 15,
+    "food": 14,
+    "ground": 33,
+    "restroom": 3
+   },
+   "overture": true,
+   "walkNodes": 854
+  },
+  "AMA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "restroom": 2,
+    "ground": 22,
+    "food": 1
+   },
+   "overture": true,
+   "walkNodes": 188
+  },
+  "ATL": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 87,
+    "food": 293,
+    "gate": 201,
+    "restroom": 33,
+    "lounge": 22,
+    "landmark": 3
+   },
+   "overture": true,
+   "walkNodes": 2391
+  },
+  "AUS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 40,
+    "restroom": 20,
+    "food": 59,
+    "ground": 46,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 1954
+  },
+  "BHM": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 22,
+    "gate": 19,
+    "food": 10,
+    "restroom": 10
+   },
+   "overture": true,
+   "walkNodes": 82
+  },
+  "BNA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 51,
+    "gate": 51,
+    "restroom": 16,
+    "food": 48,
+    "lounge": 6
+   },
+   "overture": true,
+   "walkNodes": 813
+  },
+  "BOI": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 14,
+    "gate": 23,
+    "ground": 24,
+    "restroom": 5,
+    "landmark": 1,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 3370
+  },
+  "BOS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 143,
+    "restroom": 49,
+    "food": 124,
+    "gate": 113,
+    "lounge": 21,
+    "landmark": 3
+   },
+   "overture": true,
+   "walkNodes": 5948
+  },
+  "BUF": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 46,
+    "gate": 24,
+    "food": 12,
+    "restroom": 3,
+    "lounge": 3
+   },
+   "overture": true,
+   "walkNodes": 886
+  },
+  "BWI": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 66,
+    "restroom": 22,
+    "food": 70,
+    "gate": 77,
+    "lounge": 6
+   },
+   "overture": true,
+   "walkNodes": 1784
+  },
+  "BZN": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 7,
+    "gate": 12,
+    "ground": 20,
+    "restroom": 7
+   },
+   "overture": true,
+   "walkNodes": 824
+  },
+  "CHS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 18,
+    "restroom": 7,
+    "food": 19,
+    "ground": 28,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 4970
+  },
+  "CLE": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 41,
+    "lounge": 4,
+    "gate": 49,
+    "restroom": 12,
+    "ground": 49
+   },
+   "overture": true,
+   "walkNodes": 2417
+  },
+  "CLT": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 124,
+    "food": 101,
+    "restroom": 23,
+    "lounge": 10,
+    "ground": 58
+   },
+   "overture": true,
+   "walkNodes": 3122
+  },
+  "CMH": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 33,
+    "landmark": 17,
+    "gate": 34,
+    "restroom": 7,
+    "food": 38,
+    "lounge": 3
+   },
+   "overture": true,
+   "walkNodes": 1734
+  },
+  "COS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 12,
+    "food": 10,
+    "lounge": 1,
+    "ground": 20,
+    "restroom": 5
+   },
+   "overture": true,
+   "walkNodes": 3353
+  },
+  "CVG": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 32,
+    "gate": 47,
+    "food": 39,
+    "lounge": 7,
+    "restroom": 2,
+    "landmark": 1
+   },
+   "overture": true,
+   "walkNodes": 2593
+  },
+  "DAL": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 90,
+    "landmark": 2,
+    "gate": 20,
+    "food": 32,
+    "restroom": 5,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 4756
+  },
+  "DCA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 97,
+    "gate": 59,
+    "food": 74,
+    "restroom": 17,
+    "lounge": 7,
+    "landmark": 2
+   },
+   "overture": true,
+   "walkNodes": 2320
+  },
+  "DEN": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 86,
+    "food": 163,
+    "restroom": 45,
+    "gate": 176,
+    "lounge": 12,
+    "landmark": 3
+   },
+   "overture": true,
+   "walkNodes": 2844
+  },
+  "DTW": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 133,
+    "restroom": 37,
+    "food": 103,
+    "ground": 55,
+    "landmark": 1,
+    "lounge": 14
+   },
+   "overture": true,
+   "walkNodes": 4116
+  },
+  "ECP": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "restroom": 4,
+    "ground": 19,
+    "gate": 7,
+    "food": 4
+   },
+   "overture": true,
+   "walkNodes": 408
+  },
+  "ELP": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 30,
+    "gate": 15,
+    "food": 13,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 4590
+  },
+  "EUG": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 6,
+    "ground": 14,
+    "restroom": 5,
+    "food": 3
+   },
+   "overture": true,
+   "walkNodes": 213
+  },
+  "FAT": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 14,
+    "landmark": 2,
+    "food": 4
+   },
+   "overture": true,
+   "walkNodes": 826
+  },
+  "FLL": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 93,
+    "gate": 67,
+    "restroom": 20,
+    "food": 69,
+    "lounge": 5
+   },
+   "overture": true,
+   "walkNodes": 1087
+  },
+  "GEG": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 18,
+    "restroom": 11,
+    "food": 20,
+    "landmark": 6,
+    "ground": 29
+   },
+   "overture": true,
+   "walkNodes": 432
+  },
+  "GRR": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 35,
+    "gate": 23,
+    "restroom": 5,
+    "food": 10,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 689
+  },
+  "GSP": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "restroom": 1,
+    "food": 13,
+    "ground": 24,
+    "gate": 13,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 232
+  },
+  "HDN": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "restroom": 10,
+    "gate": 6,
+    "food": 2,
+    "landmark": 1,
+    "ground": 2
+   },
+   "overture": true,
+   "walkNodes": 67
+  },
+  "HNL": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 59,
+    "food": 54,
+    "restroom": 38,
+    "ground": 63,
+    "lounge": 14,
+    "landmark": 1
+   },
+   "overture": true,
+   "walkNodes": 2840
+  },
+  "HOU": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 30,
+    "ground": 46,
+    "food": 22,
+    "restroom": 3,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 1128
+  },
+  "HRL": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 7,
+    "ground": 6,
+    "food": 3
+   },
+   "overture": true,
+   "walkNodes": 86
+  },
+  "ICT": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 36,
+    "gate": 11,
+    "food": 4
+   },
+   "overture": true,
+   "walkNodes": 2313
+  },
+  "IND": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 37,
+    "gate": 40,
+    "landmark": 4,
+    "food": 32,
+    "restroom": 19,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 825
+  },
+  "ISP": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 34,
+    "gate": 12,
+    "restroom": 4,
+    "landmark": 1,
+    "food": 14
+   },
+   "overture": true,
+   "walkNodes": 1781
+  },
+  "JAN": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 8,
+    "restroom": 3,
+    "food": 4,
+    "ground": 15
+   },
+   "overture": true,
+   "walkNodes": 414
+  },
+  "KOA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 13,
+    "restroom": 5,
+    "ground": 13,
+    "landmark": 2,
+    "food": 5
+   },
+   "overture": true,
+   "walkNodes": 646
+  },
+  "LAS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 221,
+    "gate": 110,
+    "food": 134,
+    "restroom": 37,
+    "lounge": 18
+   },
+   "overture": true,
+   "walkNodes": 8820
+  },
+  "LAX": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 224,
+    "gate": 148,
+    "restroom": 42,
+    "food": 147,
+    "lounge": 39,
+    "landmark": 1
+   },
+   "overture": true,
+   "walkNodes": 5412
+  },
+  "LBB": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 9,
+    "ground": 11,
+    "food": 4
+   },
+   "overture": true,
+   "walkNodes": 41
+  },
+  "LGA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 85,
+    "restroom": 20,
+    "food": 88,
+    "gate": 80,
+    "lounge": 14
+   },
+   "overture": true,
+   "walkNodes": 3074
+  },
+  "LGB": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 64,
+    "restroom": 4,
+    "food": 15,
+    "gate": 11,
+    "landmark": 1
+   },
+   "overture": true,
+   "walkNodes": 1138
+  },
+  "LIT": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 6,
+    "gate": 12,
+    "restroom": 1,
+    "ground": 18,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 189
+  },
+  "MAF": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 14,
+    "gate": 5,
+    "food": 2
+   },
+   "overture": true,
+   "walkNodes": 105
+  },
+  "MCI": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 40,
+    "restroom": 14,
+    "food": 32,
+    "landmark": 2,
+    "ground": 36
+   },
+   "overture": true,
+   "walkNodes": 838
+  },
+  "MCO": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 114,
+    "food": 89,
+    "ground": 114,
+    "restroom": 20,
+    "lounge": 14
+   },
+   "overture": true,
+   "walkNodes": 4656
+  },
+  "MEM": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 31,
+    "gate": 60,
+    "food": 16,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 693
+  },
+  "MHT": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 16,
+    "ground": 25,
+    "gate": 14,
+    "restroom": 7
+   },
+   "overture": true,
+   "walkNodes": 1485
+  },
+  "MIA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 195,
+    "gate": 129,
+    "food": 127,
+    "restroom": 29,
+    "lounge": 15
+   },
+   "overture": true,
+   "walkNodes": 5025
+  },
+  "MKE": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 43,
+    "gate": 48,
+    "restroom": 11,
+    "landmark": 17,
+    "food": 20,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 3226
+  },
+  "MSP": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 98,
+    "gate": 121,
+    "restroom": 37,
+    "food": 132,
+    "landmark": 1,
+    "lounge": 7
+   },
+   "overture": true,
+   "walkNodes": 4694
+  },
+  "MSY": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 38,
+    "gate": 35,
+    "restroom": 20,
+    "food": 36,
+    "lounge": 4
+   },
+   "overture": true,
+   "walkNodes": 580
+  },
+  "MTJ": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 16,
+    "food": 4,
+    "gate": 7,
+    "restroom": 2
+   },
+   "overture": true,
+   "walkNodes": 195
+  },
+  "MYR": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 13,
+    "ground": 18,
+    "food": 13
+   },
+   "overture": true,
+   "walkNodes": 1495
+  },
+  "OAK": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "landmark": 2,
+    "gate": 29,
+    "food": 28,
+    "lounge": 2,
+    "restroom": 11,
+    "ground": 71
+   },
+   "overture": true,
+   "walkNodes": 5569
+  },
+  "OGG": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 36,
+    "food": 10,
+    "restroom": 8,
+    "gate": 16,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 174
+  },
+  "OKC": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 21,
+    "restroom": 4,
+    "food": 14,
+    "ground": 26,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 794
+  },
+  "OMA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 19,
+    "food": 14,
+    "ground": 33,
+    "restroom": 1
+   },
+   "overture": true,
+   "walkNodes": 280
+  },
+  "ONT": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 37,
+    "food": 23,
+    "gate": 27,
+    "restroom": 13,
+    "landmark": 2,
+    "lounge": 4
+   },
+   "overture": true,
+   "walkNodes": 768
+  },
+  "ORF": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 36,
+    "landmark": 2,
+    "restroom": 5,
+    "gate": 27,
+    "food": 16,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 1894
+  },
+  "PDX": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 53,
+    "food": 65,
+    "restroom": 19,
+    "lounge": 6,
+    "ground": 54,
+    "landmark": 2
+   },
+   "overture": true,
+   "walkNodes": 1888
+  },
+  "PHL": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 67,
+    "gate": 127,
+    "restroom": 22,
+    "food": 116,
+    "lounge": 9
+   },
+   "overture": true,
+   "walkNodes": 2170
+  },
+  "PIT": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 55,
+    "food": 37,
+    "restroom": 8,
+    "ground": 35,
+    "lounge": 3
+   },
+   "overture": true,
+   "walkNodes": 1811
+  },
+  "PNS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 10,
+    "restroom": 2,
+    "food": 6,
+    "ground": 24,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 2723
+  },
+  "PSP": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 16,
+    "food": 13,
+    "ground": 16,
+    "restroom": 1,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 3847
+  },
+  "PVD": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 34,
+    "gate": 24,
+    "food": 20,
+    "restroom": 3,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 944
+  },
+  "PWM": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 6,
+    "gate": 11,
+    "restroom": 4,
+    "ground": 32
+   },
+   "overture": true,
+   "walkNodes": 1194
+  },
+  "RIC": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 24,
+    "restroom": 12,
+    "gate": 28,
+    "food": 9,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 549
+  },
+  "RNO": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 45,
+    "gate": 23,
+    "landmark": 1,
+    "food": 14,
+    "restroom": 4,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 2945
+  },
+  "ROC": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 21,
+    "food": 8,
+    "ground": 41
+   },
+   "overture": true,
+   "walkNodes": 798
+  },
+  "RSW": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 38,
+    "gate": 28,
+    "restroom": 13,
+    "food": 21,
+    "landmark": 3,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 1066
+  },
+  "SAN": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 54,
+    "restroom": 22,
+    "food": 65,
+    "ground": 251,
+    "lounge": 7
+   },
+   "overture": true,
+   "walkNodes": 2527
+  },
+  "SAV": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 20,
+    "gate": 15,
+    "restroom": 6,
+    "ground": 18,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 248
+  },
+  "SBA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 29,
+    "restroom": 6,
+    "gate": 10,
+    "food": 2,
+    "landmark": 2
+   },
+   "overture": true,
+   "walkNodes": 3007
+  },
+  "SDF": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 23,
+    "food": 18,
+    "restroom": 12,
+    "landmark": 31,
+    "ground": 68,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 95
+  },
+  "SEA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 111,
+    "ground": 86,
+    "gate": 103,
+    "restroom": 52,
+    "lounge": 11
+   },
+   "overture": true,
+   "walkNodes": 2607
+  },
+  "SFO": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 119,
+    "gate": 119,
+    "restroom": 100,
+    "food": 106,
+    "landmark": 16,
+    "lounge": 23
+   },
+   "overture": true,
+   "walkNodes": 3122
+  },
+  "SJC": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 120,
+    "gate": 37,
+    "food": 37,
+    "restroom": 25,
+    "lounge": 5,
+    "landmark": 9
+   },
+   "overture": true,
+   "walkNodes": 5083
+  },
+  "SJU": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 48,
+    "food": 31,
+    "gate": 35,
+    "lounge": 7,
+    "restroom": 7
+   },
+   "overture": true,
+   "walkNodes": 493
+  },
+  "SLC": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 64,
+    "restroom": 29,
+    "gate": 87,
+    "ground": 41,
+    "lounge": 3
+   },
+   "overture": true,
+   "walkNodes": 989
+  },
+  "SMF": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 30,
+    "gate": 34,
+    "landmark": 2,
+    "food": 44,
+    "restroom": 16,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 1282
+  },
+  "SRQ": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 18,
+    "food": 13,
+    "ground": 28,
+    "restroom": 6,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 1566
+  },
+  "STL": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 46,
+    "restroom": 18,
+    "gate": 54,
+    "food": 57,
+    "lounge": 4
+   },
+   "overture": true,
+   "walkNodes": 5343
+  },
+  "STS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 7,
+    "restroom": 11,
+    "gate": 8,
+    "landmark": 2,
+    "ground": 21
+   },
+   "overture": true,
+   "walkNodes": 709
+  },
+  "STT": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 14,
+    "food": 6
+   },
+   "overture": true,
+   "walkNodes": 142
+  },
+  "TPA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 124,
+    "food": 51,
+    "gate": 60,
+    "lounge": 9,
+    "restroom": 5
+   },
+   "overture": true,
+   "walkNodes": 3320
+  },
+  "TUS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 21,
+    "food": 15,
+    "ground": 32,
+    "restroom": 8,
+    "landmark": 1,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 2545
+  },
+  "TYS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 7,
+    "restroom": 4,
+    "gate": 12,
+    "ground": 20,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 178
+  },
+  "VPS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 14,
+    "ground": 9,
+    "food": 2,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 114
+  },
+  "DFW": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 133,
+    "gate": 168,
+    "food": 218,
+    "landmark": 7,
+    "restroom": 71,
+    "lounge": 28
+   },
+   "overture": true,
+   "walkNodes": 5426
+  },
+  "EWR": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 95,
+    "gate": 101,
+    "food": 151,
+    "restroom": 15,
+    "landmark": 1,
+    "lounge": 14
+   },
+   "overture": true,
+   "walkNodes": 1601
+  },
+  "IAD": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 86,
+    "gate": 130,
+    "food": 97,
+    "restroom": 29,
+    "lounge": 25
+   },
+   "overture": true,
+   "walkNodes": 8500
+  },
+  "JFK": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 115,
+    "gate": 136,
+    "food": 161,
+    "restroom": 36,
+    "lounge": 35
+   },
+   "overture": true,
+   "walkNodes": 6692
+  },
+  "ORD": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 166,
+    "gate": 215,
+    "food": 156,
+    "restroom": 111,
+    "lounge": 24,
+    "landmark": 39
+   },
+   "overture": true,
+   "walkNodes": 6996
+  },
+  "NAS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 13,
+    "gate": 17,
+    "food": 13,
+    "restroom": 7,
+    "lounge": 2
+   },
+   "overture": true,
+   "walkNodes": 129
+  },
+  "BZE": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 11,
+    "restroom": 1,
+    "gate": 12,
+    "ground": 15,
+    "landmark": 4
+   },
+   "overture": true,
+   "walkNodes": 68
+  },
+  "GCM": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 31,
+    "food": 4,
+    "restroom": 3,
+    "gate": 9
+   },
+   "overture": true,
+   "walkNodes": 0
+  },
+  "LIR": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 21,
+    "food": 5,
+    "gate": 4,
+    "restroom": 1
+   },
+   "overture": true,
+   "walkNodes": 25
+  },
+  "HAV": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 31,
+    "gate": 12,
+    "food": 21,
+    "restroom": 2,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 80
+  },
+  "MBJ": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 10,
+    "ground": 18,
+    "restroom": 3,
+    "gate": 7,
+    "lounge": 5
+   },
+   "overture": true,
+   "walkNodes": 235
+  },
+  "CUN": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 47,
+    "restroom": 3,
+    "gate": 60,
+    "ground": 79,
+    "lounge": 9
+   },
+   "overture": true,
+   "walkNodes": 258
+  },
+  "PVR": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 36,
+    "food": 18,
+    "gate": 20,
+    "lounge": 4
+   },
+   "overture": true,
+   "walkNodes": 1074
+  },
+  "SJD": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 23,
+    "restroom": 6,
+    "food": 22,
+    "lounge": 4,
+    "gate": 12
+   },
+   "overture": true,
+   "walkNodes": 25
+  },
+  "PLS": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 10,
+    "food": 2,
+    "lounge": 1
+   },
+   "overture": true,
+   "walkNodes": 0
+  },
+  "CDG": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 137,
+    "gate": 245,
+    "food": 143,
+    "restroom": 65,
+    "lounge": 24
+   },
+   "overture": true,
+   "walkNodes": 7398
+  },
+  "FRA": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 160,
+    "gate": 121,
+    "restroom": 96,
+    "food": 148,
+    "lounge": 37,
+    "landmark": 1
+   },
+   "overture": true,
+   "walkNodes": 4559
+  },
+  "FCO": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 127,
+    "gate": 65,
+    "food": 82,
+    "restroom": 17,
+    "lounge": 16
+   },
+   "overture": true,
+   "walkNodes": 685
+  },
+  "LHR": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "food": 155,
+    "gate": 148,
+    "landmark": 7,
+    "ground": 231,
+    "restroom": 52,
+    "lounge": 79
+   },
+   "overture": true,
+   "walkNodes": 6373
+  },
+  "DUB": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 83,
+    "restroom": 28,
+    "gate": 88,
+    "food": 71,
+    "landmark": 2,
+    "lounge": 9
+   },
+   "overture": true,
+   "walkNodes": 915
+  },
+  "MXP": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 102,
+    "gate": 61,
+    "restroom": 15,
+    "food": 59,
+    "lounge": 14,
+    "landmark": 1
+   },
+   "overture": true,
+   "walkNodes": 688
+  },
+  "LIN": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 95,
+    "food": 27,
+    "restroom": 1,
+    "gate": 18,
+    "lounge": 5
+   },
+   "overture": true,
+   "walkNodes": 4302
+  },
+  "EDI": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "ground": 96,
+    "food": 33,
+    "gate": 28,
+    "restroom": 10,
+    "lounge": 11,
+    "landmark": 1
+   },
+   "overture": true,
+   "walkNodes": 1838
+  },
+  "BCN": {
+   "generated": "2026-10-13T17:19:56.918Z",
+   "counts": {
+    "gate": 125,
+    "ground": 105,
+    "food": 97,
+    "restroom": 35,
+    "landmark": 3,
+    "lounge": 9
+   },
+   "overture": true,
+   "walkNodes": 4769
+  }
+ },
+ "generated": "2026-10-13T17:19:56.918Z",
+ "overtureRelease": "2026-09-23.1",
+ "failed": [
+  "ANC",
+  "BDL",
+  "BUR",
+  "CRP",
+  "DSM",
+  "ITO",
+  "JAX",
+  "LIH",
+  "MDW",
+  "PBI",
+  "PHX",
+  "RDU",
+  "SAT",
+  "SNA",
+  "TUL",
+  "IAH",
+  "AUA",
+  "SJO",
+  "PUJ",
+  "SXM",
+  "AMS",
+  "BER",
+  "MUC"
+ ]
+}
