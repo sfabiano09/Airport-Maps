@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Airport Maps</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Airport Maps">
+<meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16181c" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="core.js"></script>
+<style>
+:root{
+  --bg:#f6f5f1; --surface:#ffffff; --surface-2:#efede7; --line:#dedad0;
+  --ink:#1b1d21; --ink-2:#5b5f66; --ink-3:#8a8e95;
+  --accent:#d6451b; --accent-ink:#ffffff;
+  --map-bg:#e9e6de; --terminal:#c9c3b3; --terminal-line:#8f8877; --indoor:#b3ac9b;
+  --c-gate:#1b1d21; --c-food:#d97706; --c-restroom:#2563eb; --c-lounge:#7c3aed; --c-ground:#15803d; --c-landmark:#6b7280;
+  --shadow:0 6px 24px rgba(20,20,20,.12),0 1px 3px rgba(20,20,20,.08);
+  --r:14px;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16181c; --surface:#202328; --surface-2:#2a2e34; --line:#363a41;
+    --ink:#eef0f2; --ink-2:#a9aeb6; --ink-3:#7c818a;
+    --accent:#ff6a3d; --accent-ink:#16181c;
+    --map-bg:#1d2024; --terminal:#3a3f47; --terminal-line:#6b7380; --indoor:#4d535c;
+    --c-gate:#eef0f2; --c-food:#f59e0b; --c-restroom:#60a5fa; --c-lounge:#a78bfa; --c-ground:#4ade80; --c-landmark:#9ca3af;
+    --shadow:0 6px 24px rgba(0,0,0,.45),0 1px 3px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16181c; --surface:#202328; --surface-2:#2a2e34; --line:#363a41;
+  --ink:#eef0f2; --ink-2:#a9aeb6; --ink-3:#7c818a;
+  --accent:#ff6a3d; --accent-ink:#16181c;
+  --map-bg:#1d2024; --terminal:#3a3f47; --terminal-line:#6b7380; --indoor:#4d535c;
+  --c-gate:#eef0f2; --c-food:#f59e0b; --c-restroom:#60a5fa; --c-lounge:#a78bfa; --c-ground:#4ade80; --c-landmark:#9ca3af;
+  --shadow:0 6px 24px rgba(0,0,0,.45),0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+.hidden{display:none!important}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.02em}
+
+/* ---------- Home ---------- */
+#home{min-height:100%;padding:calc(var(--safe-t) + 20px) 16px calc(var(--safe-b) + 32px);max-width:640px;margin:0 auto}
+.brand{display:flex;align-items:baseline;justify-content:space-between;margin:4px 2px 14px}
+.brand h1{font-size:30px;line-height:1.1;margin:0;font-weight:750;letter-spacing:-.02em}
+.net{font-size:13px;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.net i{width:8px;height:8px;border-radius:50%;background:var(--c-ground);display:inline-block}
+.net.off i{background:var(--accent)}
+.search{position:sticky;top:calc(var(--safe-t) + 8px);z-index:5}
+.search input{width:100%;height:50px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);
+  padding:0 16px 0 44px;font-size:17px;box-shadow:var(--shadow);outline:none}
+.search input:focus{border-color:var(--accent)}
+.search svg{position:absolute;left:15px;top:15px;width:20px;height:20px;color:var(--ink-3)}
+.sec{margin:26px 2px 8px;font-size:13px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;align-items:center}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.row{display:flex;align-items:center;gap:14px;padding:12px 14px;border-top:1px solid var(--line);width:100%;text-align:left;min-height:56px}
+.row:first-child{border-top:0}
+.row:active{background:var(--surface-2)}
+.code{font-weight:750;font-size:18px;width:46px;flex:none}
+.row .main{flex:1;min-width:0}
+.row .t1{font-weight:560;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t2{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;background:var(--surface-2);color:var(--ink-2);flex:none}
+.badge.wn{background:#304cb2;color:#fff}
+.badge.off{background:transparent;border:1px solid var(--c-ground);color:var(--c-ground)}
+.empty{padding:18px 14px;color:var(--ink-2);font-size:15px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-top:26px}
+.card h3{margin:0 0 4px;font-size:17px}
+.card p{margin:0 0 12px;color:var(--ink-2);font-size:14px}
+.btn{height:44px;padding:0 18px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:650}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.bar{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;margin:12px 0 6px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.small{font-size:13px;color:var(--ink-3)}
+.foot{margin-top:22px;font-size:12px;color:var(--ink-3);text-align:center}
+.foot a{color:inherit}
+
+/* ---------- Airport view ---------- */
+#airport{position:fixed;inset:0;display:flex;flex-direction:column}
+#map{position:absolute;inset:0;background:var(--map-bg)}
+.leaflet-container{background:var(--map-bg);font:inherit}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}}
+:root[data-theme="dark"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+.top{position:absolute;left:0;right:0;top:0;z-index:1000;padding:calc(var(--safe-t) + 10px) 12px 0;pointer-events:none}
+.top > *{pointer-events:auto}
+.titlebar{display:flex;align-items:center;gap:8px}
+.iconbtn{width:44px;height:44px;border-radius:12px;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;flex:none}
+.iconbtn svg{width:22px;height:22px}
+.ttl{flex:1;min-width:0;background:var(--surface);box-shadow:var(--shadow);border-radius:12px;height:44px;padding:0 12px;display:flex;flex-direction:column;justify-content:center}
+.ttl b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl span{font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gatebox{position:relative;margin-top:8px}
+.gatebox input{width:100%;height:52px;border-radius:12px;border:2px solid transparent;background:var(--surface);box-shadow:var(--shadow);
+  padding:0 48px 0 46px;font-size:19px;font-weight:600;outline:none;text-transform:uppercase}
+.gatebox input::placeholder{text-transform:none;font-weight:450;color:var(--ink-3)}
+.gatebox input:focus{border-color:var(--accent)}
+.gatebox .g{position:absolute;left:14px;top:15px;width:22px;height:22px;color:var(--accent)}
+.gatebox .x{position:absolute;right:6px;top:4px;width:44px;height:44px;display:grid;place-items:center;color:var(--ink-3)}
+.sugg{margin-top:6px;background:var(--surface);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;max-height:40vh;overflow-y:auto}
+.sugg button{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-top:1px solid var(--line);text-align:left}
+.sugg button:first-child{border-top:0}
+.chips{display:flex;gap:6px;margin:4px -12px 0;padding:4px 12px 12px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{height:32px;padding:0 12px;border-radius:16px;background:var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.18);font-size:14px;font-weight:600;white-space:nowrap;flex:none}
+.chip.on{background:var(--ink);color:var(--bg)}
+.menu{position:absolute;right:12px;top:calc(var(--safe-t) + 60px);z-index:1100;background:var(--surface);border-radius:12px;box-shadow:var(--shadow);min-width:240px;overflow:hidden}
+.menu a,.menu button{display:block;width:100%;text-align:left;padding:14px 16px;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
+.menu > :first-child{border-top:0}
+.locate{position:absolute;right:12px;z-index:1000;bottom:calc(var(--sheet-h) + 12px);transition:bottom .25s}
+
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:1000;background:var(--surface);border-radius:18px 18px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.14);
+  height:var(--sheet-h);display:flex;flex-direction:column;transition:height .25s;padding-bottom:var(--safe-b)}
+#airport{--sheet-h:42vh}
+#airport.collapsed{--sheet-h:118px}
+.handle{height:22px;display:grid;place-items:center;flex:none}
+.handle i{width:40px;height:5px;border-radius:3px;background:var(--line)}
+.tabs{display:flex;gap:2px;padding:0 8px 8px;overflow-x:auto;flex:none;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{height:38px;padding:0 10px;border-radius:10px;font-weight:620;font-size:14.5px;color:var(--ink-2);display:flex;align-items:center;gap:7px;white-space:nowrap;flex:none}
+.tab i{width:8px;height:8px;border-radius:50%}
+.tab small{font-weight:600;color:var(--ink-3);font-size:12px}
+.tab.on{background:var(--surface-2);color:var(--ink)}
+.status{padding:0 16px 6px;font-size:12px;color:var(--ink-3);flex:none}
+.status.warn{color:var(--accent)}
+.items{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid var(--line)}
+.item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.item:active{background:var(--surface-2)}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.item .main{flex:1;min-width:0}
+.item .t1{font-weight:580;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .t2{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .dist{font-size:13px;color:var(--ink-2);text-align:right;flex:none;font-variant-numeric:tabular-nums}
+.thin{padding:16px;font-size:14px;color:var(--ink-2)}
+.thin a{color:var(--accent);font-weight:600}
+.loading{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1200;background:var(--surface);box-shadow:var(--shadow);
+  border-radius:14px;padding:16px 20px;font-weight:600;display:flex;gap:12px;align-items:center;max-width:80vw}
+.spin{width:20px;height:20px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:sp 0.8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* map markers */
+.gp{background:var(--surface);color:var(--c-gate);border:1.5px solid var(--c-gate);border-radius:6px;font:700 11px/1 ui-monospace,"SF Mono",Menlo,monospace;
+  padding:3px 4px;white-space:nowrap;transform:translate(-50%,-50%);display:inline-block;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.gp.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-size:14px;padding:5px 7px;
+  box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 30%,transparent);animation:pulse 1.6s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}100%{box-shadow:0 0 0 16px transparent}}
+.hide-gates .gp:not(.sel){display:none}
+.pm{width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-50%,-50%)}
+.pm.ap{background:var(--surface);border-style:dashed;border-width:2px;opacity:.9}
+.hide-pois .pm{width:10px;height:10px;border-width:1.5px}
+.lm{font-size:11px;font-weight:700;color:var(--c-landmark);background:var(--surface);border-radius:5px;padding:2px 5px;white-space:nowrap;transform:translate(-50%,-50%);display:inline-block;border:1px solid var(--line)}
+.hide-gates .lm{display:none}
+.me{width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.25);transform:translate(-50%,-50%)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.leaflet-popup-content{margin:12px 14px;font-size:14px;line-height:1.4}
+.leaflet-popup-content b{font-size:15px}
+.leaflet-popup-content .s{color:var(--ink-2);font-size:13px}
+.leaflet-container a.leaflet-popup-close-button{color:var(--ink-3)}
+.leaflet-control-attribution{font-size:10px;background:color-mix(in srgb,var(--surface) 80%,transparent)!important;color:var(--ink-3)}
+.leaflet-control-attribution a{color:var(--ink-2)}
+.leaflet-bottom{bottom:var(--sheet-h);transition:bottom .25s}
+</style>
+</head>
+<body>
+
+<!-- ================= HOME ================= -->
+<main id="home">
+  <div class="brand">
+    <h1>Airport Maps</h1>
+    <span class="net" id="net"><i></i><span>Online</span></span>
+  </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="Airport code or city" autocomplete="off" autocapitalize="characters" spellcheck="false">
+  </div>
+
+  <div id="savedWrap">
+    <div class="sec"><span>Saved for offline</span><span id="savedCount"></span></div>
+    <div class="list" id="saved"></div>
+  </div>
+
+  <div id="all"></div>
+
+  <div class="card" id="bulk">
+    <h3>Save every airport for offline</h3>
+    <p>Downloads the terminal layouts, gates, food, restrooms, lounges and ground transport for all airports listed above, so they work with no signal. Takes a minute or two; keep the app open. Background street maps still need signal.</p>
+    <div id="bulkIdle"><button class="btn" id="bulkGo">Download all</button></div>
+    <div id="bulkRun" class="hidden">
+      <div class="bar"><i id="bulkBar"></i></div>
+      <div class="small" id="bulkTxt"></div>
+      <button class="btn ghost" id="bulkStop" style="margin-top:10px">Stop</button>
+    </div>
+  </div>
+
+  <div class="foot">
+    Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>.
+    Coverage varies by airport — check the airport's own map when something looks missing.
+  </div>
+</main>
+
+<!-- ================= AIRPORT ================= -->
+<section id="airport" class="hidden">
+  <div id="map"></div>
+
+  <div class="top">
+    <div class="titlebar">
+      <button class="iconbtn" id="back" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <div class="ttl"><b id="apTitle"></b><span id="apSub"></span></div>
+      <button class="iconbtn" id="more" aria-label="More">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+      </button>
+    </div>
+    <div class="gatebox">
+      <svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      <input id="gq" type="text" placeholder="Find gate — e.g. B22" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="search">
+      <button class="x hidden" id="gx" aria-label="Clear gate">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="sugg hidden" id="sugg"></div>
+    <div class="chips hidden" id="levels"></div>
+  </div>
+
+  <div class="menu hidden" id="menu"></div>
+
+  <button class="iconbtn locate" id="locate" aria-label="Show my location">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+  </button>
+
+  <div class="sheet" id="sheet">
+    <button class="handle" id="handle" aria-label="Expand or collapse list"><i></i></button>
+    <div class="tabs" id="tabs"></div>
+    <div class="status" id="status"></div>
+    <div class="items" id="items"></div>
+  </div>
+
+  <div class="loading hidden" id="loading"><div class="spin"></div><span id="loadingTxt">Loading map…</span></div>
+</section>
+
+<script>
+"use strict";
+const { AIRPORT_DATA, OVERPASS, meters, overpass, lookupAerodrome, featureQuery, processOSM } = AirportCore;
+/* ============================================================
+   Airport list — every US airport Southwest serves (Oct 2026)
+   plus the major hubs it doesn't. WN = Southwest.
+   ============================================================ */
+const EUROPE = new Set(["France", "Netherlands", "Germany", "Italy", "United Kingdom", "Ireland", "Spain"]);
+const REGIONS = [["us", "United States"], ["intl", "Mexico, Caribbean & Central America"], ["eu", "Europe"]];
+const AIRPORTS = AIRPORT_DATA.trim().split("\n").map(l => {
+  const [code, name, city, st, wn] = l.split("|");
+  const region = /^[A-Z]{2}$/.test(st) ? "us" : EUROPE.has(st) ? "eu" : "intl";
+  return { code, name, city, st, wn: wn === "1", region };
+}).sort((a, b) => a.city.localeCompare(b.city) || a.code.localeCompare(b.code));
+const BY_CODE = Object.fromEntries(AIRPORTS.map(a => [a.code, a]));
+// nicknames people actually type
+const ALIASES = { indy: ["IND"], vegas: ["LAS"], nyc: ["LGA", "JFK", "EWR", "ISP"], paris: ["CDG"], london: ["LHR"], rome: ["FCO"], frankfort: ["FRA"], cabo: ["SJD"],
+  cayman: ["GCM"], turks: ["PLS"], "st maarten": ["SXM"], "st. maarten": ["SXM"], schiphol: ["AMS"], heathrow: ["LHR"], "new york": ["EWR"], dc: ["DCA", "IAD", "BWI"],
+  washington: ["BWI"], sf: ["SFO", "OAK", "SJC"], "bay area": ["SFO", "OAK", "SJC"], la: ["LAX", "BUR", "LGB", "ONT", "SNA"],
+  "orange county": ["SNA"], maui: ["OGG"], kauai: ["LIH"], "big island": ["KOA", "ITO"], nola: ["MSY"], philly: ["PHL"],
+  "twin cities": ["MSP"], "st paul": ["MSP"], "fort worth": ["DFW"], "south padre": ["HRL"], steamboat: ["HDN"], tahoe: ["RNO"],
+  cincy: ["CVG"], disney: ["MCO"], vail: ["HDN"], "dallas": ["DFW"], "houston": ["IAH"], "chicago": ["ORD"] };
+
+const DATA_VERSION = 3;           // bump when the query/processing changes
+const STALE_DAYS = 45;            // refresh saved data after this when online
+/* ---------------- tiny helpers ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const walkMin = m => Math.max(1, Math.round((m * 1.35) / 1.25 / 60));
+const natural = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+/* ---------------- IndexedDB store ---------------- */
+const DB = (() => {
+  let dbp;
+  function open() {
+    if (dbp) return dbp;
+    dbp = new Promise((res, rej) => {
+      const r = indexedDB.open("airport-maps", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("airports", { keyPath: "code" });
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    return dbp;
+  }
+  async function tx(mode, fn) {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction("airports", mode), s = t.objectStore("airports");
+      const req = fn(s);
+      t.oncomplete = () => res(req && req.result);
+      t.onerror = () => rej(t.error);
+    });
+  }
+  return {
+    get: code => tx("readonly", s => s.get(code)).catch(() => null),
+    put: rec => tx("readwrite", s => s.put(rec)).catch(() => null),
+    keys: () => tx("readonly", s => s.getAllKeys()).catch(() => []),
+    all: () => tx("readonly", s => s.getAll()).catch(() => []),
+  };
+})();
+
+/* ---------------- Overpass ---------------- */
+/* ---------------- Load (cache-first, refresh when online) ----------------
+   1) data/CODE.json — built weekly by GitHub Actions from OpenStreetMap + Overture Maps (+ Wikidata website)
+   2) live OpenStreetMap query — for any airport not in the bundle                                     */
+async function fetchAirport(code) {
+  const meta = BY_CODE[code];
+  let rec = null;
+  if (meta) {
+    try {
+      const r = await fetch(`data/${code}.json`, { cache: "no-cache" });
+      if (r.ok) { const d = await r.json(); rec = { ...d, bundled: true }; }
+    } catch {}
+  }
+  if (!rec) {
+    const ap = await lookupAerodrome(code);
+    if (!ap) { const e = new Error("notfound"); e.notfound = true; throw e; }
+    const raw = await overpass(featureQuery(ap));
+    const { feats, polys } = processOSM(raw.elements || []);
+    rec = { osmName: ap.name, website: ap.website, center: ap.center, bounds: ap.bounds, feats, polys,
+      generated: new Date().toISOString(), sources: { osm: "live" } };
+  }
+  Object.assign(rec, {
+    code, v: DATA_VERSION, at: Date.now(),
+    name: meta ? meta.name : rec.osmName || code,
+    city: meta ? `${meta.city}, ${meta.st}` : "",
+  });
+  await DB.put(rec);
+  return rec;
+}
+const isStale = rec => !rec || rec.v !== DATA_VERSION || (Date.now() - rec.at) > (rec.bundled ? 7 : STALE_DAYS) * 864e5;
+
+/* ============================================================
+   HOME
+   ============================================================ */
+let savedSet = new Set();
+async function refreshSaved() {
+  const all = await DB.all();
+  savedSet = new Set(all.filter(r => r.v === DATA_VERSION).map(r => r.code));
+  renderHome();
+}
+
+function airportRow(a, saved) {
+  const sub = [a.city + (a.st ? ", " + a.st : ""), a.name].filter(Boolean).join(" · ");
+  return `<button class="row" data-code="${esc(a.code)}">
+    <span class="code mono">${esc(a.code)}</span>
+    <span class="main"><div class="t1">${esc(a.city || a.name)}</div><div class="t2">${esc(a.region === "us" ? a.name : a.name + " · " + a.st)}</div></span>
+    ${saved ? '<span class="badge off">Offline</span>' : ""}
+    ${a.wn ? '<span class="badge wn">WN</span>' : ""}
+  </button>`;
+}
+
+function renderHome() {
+  const q = $("q").value.trim().toLowerCase();
+  const aliased = new Set(Object.entries(ALIASES).filter(([k]) => q.length >= 2 && k.startsWith(q)).flatMap(([, v]) => v));
+  const match = a => !q || aliased.has(a.code) || a.code.toLowerCase().startsWith(q) || a.city.toLowerCase().includes(q) || a.name.toLowerCase().includes(q) || a.st.toLowerCase() === q;
+  const recents = lsGet("recents", []);
+  const savedList = [...savedSet].map(c => BY_CODE[c] || { code: c, name: (lsGet("names", {})[c]) || c, city: "", st: "", wn: false })
+    .sort((a, b) => recents.indexOf(a.code) === -1 ? 1 : recents.indexOf(b.code) === -1 ? -1 : recents.indexOf(a.code) - recents.indexOf(b.code));
+  const savedShown = savedList.filter(match);
+  $("savedWrap").classList.toggle("hidden", !savedShown.length);
+  $("saved").innerHTML = savedShown.map(a => airportRow(a, true)).join("");
+  $("savedCount").textContent = savedSet.size ? `${savedSet.size}` : "";
+
+  const list = AIRPORTS.filter(match);
+  const rows = arr => arr.map(a => airportRow(a, savedSet.has(a.code))).join("");
+  const code = q.toUpperCase();
+  const lookup = /^[A-Z]{3}$/.test(code) && !BY_CODE[code]
+    ? `<button class="row" data-code="${code}"><span class="code mono">${code}</span>
+      <span class="main"><div class="t1">Look up ${code}</div><div class="t2">Any airport worldwide by its 3-letter code</div></span></button>` : "";
+  let html;
+  if (q) {
+    html = `<div class="sec"><span>Matches</span></div><div class="list">${lookup + rows(list) ||
+      `<div class="empty">No match. Type a 3-letter code to look up any airport.</div>`}</div>`;
+  } else {
+    html = REGIONS.map(([k, label], i) => {
+      const grp = list.filter(a => a.region === k);
+      return `<div class="sec"><span>${label}</span><span>${grp.length}${i === 0 ? " · WN = Southwest" : ""}</span></div><div class="list">${rows(grp)}</div>`;
+    }).join("");
+  }
+  $("all").innerHTML = html;
+}
+
+function setNet() {
+  const on = navigator.onLine;
+  $("net").classList.toggle("off", !on);
+  $("net").querySelector("span").textContent = on ? "Online" : "Offline";
+}
+
+/* ---------- bulk offline download ---------- */
+let bulkStop = false;
+async function bulkDownload() {
+  bulkStop = false;
+  $("bulkIdle").classList.add("hidden"); $("bulkRun").classList.remove("hidden");
+  const todo = [];
+  for (const a of AIRPORTS) { const rec = await DB.get(a.code); if (isStale(rec)) todo.push(a.code); }
+  const total = todo.length; let done = 0, failed = [];
+  const upd = msg => { $("bulkBar").style.width = (total ? (done / total) * 100 : 100) + "%"; $("bulkTxt").textContent = msg; };
+  if (!total) upd("Everything is already saved and up to date.");
+  for (const code of todo) {
+    if (bulkStop) break;
+    if (!navigator.onLine) { upd("Lost signal — paused. Tap Download all again when back online."); break; }
+    upd(`Saving ${code} (${done + 1} of ${total})…`);
+    let ok = false;
+    for (let attempt = 0; attempt < 3 && !ok && !bulkStop; attempt++) {
+      try { const rec = await fetchAirport(code); ok = true; if (!rec.bundled) await sleep(2500); /* live map server: go easy */ }
+      catch (e) { if (e.notfound) break; upd(`Map server busy — waiting to retry ${code}…`); await sleep(15000 * (attempt + 1)); }
+    }
+    if (!ok) failed.push(code);
+    done++;
+    await refreshSaved();
+    await sleep(150);
+  }
+  upd(bulkStop ? `Stopped. ${savedSet.size} airports saved.` :
+    `Done. ${savedSet.size} airports saved for offline.` + (failed.length ? ` Couldn't get: ${failed.join(", ")} — tap again to retry.` : ""));
+  $("bulkStop").classList.add("hidden");
+  setTimeout(() => { $("bulkIdle").classList.remove("hidden"); $("bulkRun").classList.add("hidden"); $("bulkStop").classList.remove("hidden"); }, 6000);
+}
+
+/* ============================================================
+   AIRPORT VIEW
+   ============================================================ */
+const CATS = [
+  { k: "food", label: "Food", color: "--c-food" },
+  { k: "restroom", label: "Restrooms", color: "--c-restroom" },
+  { k: "lounge", label: "Lounges", color: "--c-lounge" },
+  { k: "ground", label: "Ground", color: "--c-ground" },
+  { k: "gate", label: "Gates", color: "--c-gate" },
+];
+let map, layers = {}, tileLayer, meMarker;
+let cur = null;             // current airport record
+let tab = lsGet("tab", "food");
+let level = "all";
+let selGate = null;         // selected gate feature
+let markerById = {};
+
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+function ensureMap() {
+  if (map) return;
+  map = L.map("map", { zoomControl: false, attributionControl: true, maxZoom: 21, zoomSnap: 0.5 });
+  tileLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 21, maxNativeZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(map);
+  map.on("zoomend", zoomClasses);
+  map.on("click", () => { $("menu").classList.add("hidden"); $("sugg").classList.add("hidden"); });
+}
+function zoomClasses() {
+  const z = map.getZoom(), el = $("map");
+  el.classList.toggle("hide-gates", z < 16.5);
+  el.classList.toggle("hide-pois", z < 16);
+}
+
+function levelsOf(f) { return f.lv ? String(f.lv).split(/[;,]/).map(s => s.trim()).filter(Boolean) : []; }
+function onLevel(f) { if (level === "all") return true; const l = levelsOf(f); return !l.length || l.includes(level); }
+
+function srcNote(f) {
+  const when = f.u ? ` · updated ${f.u.slice(0, 7)}` : "";
+  if (f.cl) return "May have closed (business listing says closed)" + when;
+  if (f.src === "ovt") return "Location approximate — from business listings, not the terminal map" + when;
+  if (f.src === "osm+ovt") return "Confirmed by OpenStreetMap + business listings" + when;
+  return f.u ? `OpenStreetMap${when}` : "";
+}
+function popupHtml(f) {
+  const bits = [`<b>${esc(f.c === "gate" ? "Gate " + f.n : (f.n || f.s))}</b>`];
+  if (f.c !== "gate" && f.n) bits.push(`<div class="s">${esc(f.s)}</div>`);
+  if (f.lv) bits.push(`<div class="s">Level ${esc(f.lv)}</div>`);
+  if (f.h) bits.push(`<div class="s">Hours: ${esc(f.h)}</div>`);
+  const src = srcNote(f);
+  if (src) bits.push(`<div class="s">${esc(src)}</div>`);
+  if (f.web) bits.push(`<div class="s"><a href="${esc(f.web)}" target="_blank" rel="noopener">Website</a></div>`);
+  if (selGate && f !== selGate) { const m = meters(selGate, f); bits.push(`<div class="s">~${walkMin(m)} min walk from gate ${esc(selGate.n)} (${Math.round(m)} m straight line)</div>`); }
+  return bits.join("");
+}
+
+function drawAirport() {
+  ensureMap();
+  Object.values(layers).forEach(l => map.removeLayer(l));
+  layers = { polys: L.layerGroup(), pois: L.layerGroup(), gates: L.layerGroup(), landmarks: L.layerGroup() };
+  markerById = {};
+  const termStyle = { color: cssVar("--terminal-line"), weight: 1.5, fillColor: cssVar("--terminal"), fillOpacity: .55 };
+  const indoorStyle = { color: cssVar("--indoor"), weight: 1, fill: false, opacity: .7 };
+  cur.polys.forEach(p => L.polygon(p.r, p.k === "terminal" ? termStyle : indoorStyle).addTo(layers.polys));
+  for (const f of cur.feats) {
+    if (!onLevel(f)) continue;
+    let m;
+    if (f.c === "gate") {
+      m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<span class="gp${f === selGate ? " sel" : ""}">${esc(f.n)}</span>`, iconSize: [0, 0] }), zIndexOffset: f === selGate ? 2000 : 500 });
+      m.addTo(layers.gates);
+    } else if (f.c === "landmark") {
+      m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<span class="lm">${esc(f.s)}</span>`, iconSize: [0, 0] }) });
+      m.addTo(layers.landmarks);
+    } else {
+      const col = cssVar(CATS.find(c => c.k === f.c).color);
+      m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<div class="pm${f.ap ? " ap" : ""}" style="${f.ap ? "border-color:" + col : "background:" + col}"></div>`, iconSize: [0, 0] }), zIndexOffset: f.c === tab ? 300 : 0 });
+      m.addTo(layers.pois);
+    }
+    m.bindPopup(() => popupHtml(f), { offset: [0, -4], autoPanPaddingTopLeft: [10, 170], autoPanPaddingBottomRight: [10, 20] });
+    markerById[f.id] = m;
+  }
+  Object.values(layers).forEach(l => l.addTo(map));
+  zoomClasses();
+}
+
+function fitAirport() {
+  const pts = [];
+  cur.polys.forEach(p => { if (p.k === "terminal") p.r.forEach(x => pts.push(x)); });
+  cur.feats.forEach(f => { if (f.c === "gate") pts.push([f.lat, f.lon]); });
+  const b = pts.length > 2 ? L.latLngBounds(pts) : L.latLngBounds([cur.bounds.minlat, cur.bounds.minlon], [cur.bounds.maxlat, cur.bounds.maxlon]);
+  map.fitBounds(b, { paddingTopLeft: [16, 170], paddingBottomRight: [16, 16 + sheetPx()], maxZoom: 18 });
+}
+function sheetPx() { return $("sheet").getBoundingClientRect().height || window.innerHeight * .42; }
+
+function renderLevels() {
+  const set = new Set();
+  cur.feats.forEach(f => levelsOf(f).forEach(l => set.add(l)));
+  const lv = [...set].sort((a, b) => parseFloat(a) - parseFloat(b) || natural(a, b));
+  const box = $("levels");
+  if (lv.length < 2) { box.classList.add("hidden"); level = "all"; return; }
+  box.classList.remove("hidden");
+  box.innerHTML = [`<button class="chip${level === "all" ? " on" : ""}" data-lv="all">All levels</button>`]
+    .concat(lv.map(l => `<button class="chip${level === l ? " on" : ""}" data-lv="${esc(l)}">Level ${esc(l)}</button>`)).join("");
+}
+
+function renderTabs() {
+  const counts = {};
+  cur.feats.forEach(f => { if (onLevel(f)) counts[f.c] = (counts[f.c] || 0) + 1; });
+  $("tabs").innerHTML = CATS.map(c => `<button class="tab${tab === c.k ? " on" : ""}" data-tab="${c.k}">
+    <i style="background:var(${c.color})"></i>${c.label}<small>${counts[c.k] || 0}</small></button>`).join("");
+}
+
+function renderList() {
+  const items = cur.feats.filter(f => f.c === tab && onLevel(f));
+  const from = selGate;
+  if (tab === "gate") items.sort((a, b) => natural(a.n, b.n));
+  else if (from) items.forEach(f => f._d = meters(from, f)), items.sort((a, b) => a._d - b._d);
+  else items.sort((a, b) => natural(a.n || a.s, b.n || b.s));
+
+  let html = items.map(f => {
+    const title = f.c === "gate" ? "Gate " + f.n : (f.n || f.s);
+    const sub = [f.c === "gate" ? "" : (f.n ? f.s : ""), f.lv ? "Level " + f.lv : "", f.h ? f.h : "",
+      f.ap ? "location approximate" : "", f.cl ? "may have closed" : ""].filter(Boolean).join(" · ");
+    const dist = from && f.c !== "gate" ? `<span class="dist">~${walkMin(f._d)} min</span>` : "";
+    const col = CATS.find(c => c.k === f.c).color;
+    return `<button class="item" data-id="${esc(f.id)}"><span class="dot" style="background:var(${col})"></span>
+      <span class="main"><div class="t1">${esc(title)}</div>${sub ? `<div class="t2">${esc(sub)}</div>` : ""}</span>${dist}</button>`;
+  }).join("");
+  if (!items.length) html = thinNote(tab);
+  else if (items.length < 4 && tab !== "ground") html += thinNote(tab, true);
+  $("items").innerHTML = html;
+}
+
+function externalLinks() {
+  const name = cur.osmName || cur.name;
+  const c = cur.center;
+  return {
+    apple: `https://maps.apple.com/?q=${encodeURIComponent(name)}&ll=${c.lat},${c.lon}&z=16`,
+    google: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`,
+    site: cur.website,
+  };
+}
+function thinNote(k, partial) {
+  const L2 = externalLinks();
+  const what = { food: "food", restroom: "restrooms", lounge: "lounges", ground: "ground transport", gate: "gates" }[k];
+  const lead = partial ? `Only a few ${what} are mapped here, so the list may be incomplete.` : `No ${what} are mapped at this airport${level !== "all" ? " on this level" : ""}.`;
+  return `<div class="thin">${lead} Try <a href="${L2.apple}" target="_blank" rel="noopener">Apple Maps</a>, which has indoor maps for many big airports${L2.site ? `, or the <a href="${esc(L2.site)}" target="_blank" rel="noopener">airport's website</a>` : ""}.</div>`;
+}
+
+function renderStatus(extra) {
+  const el = $("status");
+  const built = new Date(cur.generated || cur.at);
+  const age = Math.round((Date.now() - built) / 864e5);
+  const when = age < 1 ? "today" : age === 1 ? "yesterday" : `${age} days ago`;
+  const srcs = cur.sources && cur.sources.overture ? "OpenStreetMap + Overture" : "OpenStreetMap";
+  let s = `Saved for offline · ${srcs} · built ${when}`;
+  if (selGate) s = `Sorted by walking time from gate ${selGate.n} · straight-line estimate`;
+  if (extra) s = extra;
+  el.textContent = s;
+  el.classList.toggle("warn", !!extra && /offline|couldn|busy/i.test(extra));
+}
+
+function renderAll() {
+  $("apTitle").textContent = `${cur.code} · ${cur.name}`;
+  $("apSub").textContent = cur.city || cur.osmName || "";
+  renderLevels(); renderTabs(); renderList(); renderStatus();
+  drawAirport();
+}
+
+/* ---------- gate search ---------- */
+const norm = s => String(s).toUpperCase().replace(/^GATE\s*/, "").replace(/[\s\-.]/g, "");
+function gateMatches(q) {
+  const n = norm(q);
+  if (!n) return [];
+  const gates = cur.feats.filter(f => f.c === "gate");
+  const scored = [];
+  for (const g of gates) {
+    let best = 99;
+    for (const r of g.refs) {
+      const rn = norm(r);
+      if (rn === n) best = Math.min(best, 0);
+      else if (/^\d+$/.test(n) && rn.replace(/^[A-Z]+/, "") === n) best = Math.min(best, 1);
+      else if (rn.startsWith(n)) best = Math.min(best, 2);
+    }
+    if (best < 99) scored.push([best, g]);
+  }
+  return scored.sort((a, b) => a[0] - b[0] || natural(a[1].n, b[1].n)).map(x => x[1]);
+}
+function showSuggestions() {
+  const q = $("gq").value;
+  $("gx").classList.toggle("hidden", !q && !selGate);
+  const box = $("sugg");
+  if (!q.trim()) { box.classList.add("hidden"); return; }
+  const m = gateMatches(q).slice(0, 8);
+  box.classList.remove("hidden");
+  box.innerHTML = m.length ? m.map(g => `<button data-gate="${esc(g.id)}"><span class="code mono" style="width:auto">${esc(g.n)}</span>
+      <span class="t2" style="color:var(--ink-2);font-size:13px">${g.lv ? "Level " + esc(g.lv) : "Gate"}</span></button>`).join("")
+    : `<div class="thin">No gate "${esc(q.toUpperCase())}" in the map data. ${cur.feats.some(f => f.c === "gate") ? "Check the Gates tab for what's mapped." : "This airport's gates aren't mapped yet."}</div>`;
+}
+function selectGate(g) {
+  selGate = g;
+  lsSet("gate:" + cur.code, g ? g.id : null);
+  $("gq").value = g ? g.n : "";
+  $("gq").blur();
+  $("sugg").classList.add("hidden");
+  $("gx").classList.toggle("hidden", !g);
+  if (g && level !== "all" && !onLevel(g)) level = "all";
+  if (g && tab === "gate") tab = "food";
+  renderLevels(); renderTabs(); renderList(); renderStatus(); drawAirport();
+  if (g) {
+    map.flyTo([g.lat, g.lon], 18, { duration: .8 });
+    // nudge so the pin isn't hidden behind the bottom sheet
+    map.once("moveend", () => map.panBy([0, sheetPx() / 2 - 60], { animate: true }));
+  }
+}
+
+/* ---------- open / load ---------- */
+let loadToken = 0;
+async function openAirport(code, opts = {}) {
+  code = code.toUpperCase();
+  const token = ++loadToken;
+  $("home").classList.add("hidden"); $("airport").classList.remove("hidden");
+  if (!opts.fromHistory) history.pushState({ code }, "", "#" + code);
+  const recents = lsGet("recents", []).filter(c => c !== code); recents.unshift(code); lsSet("recents", recents.slice(0, 30));
+  ensureMap();
+  setTimeout(() => map.invalidateSize(), 50);
+  selGate = null; level = "all"; $("gq").value = ""; $("gx").classList.add("hidden"); $("menu").classList.add("hidden");
+
+  const meta = BY_CODE[code];
+  $("apTitle").textContent = meta ? `${code} · ${meta.name}` : code;
+  $("apSub").textContent = meta ? `${meta.city}, ${meta.st}` : "";
+
+  let rec = await DB.get(code);
+  if (rec && rec.v === DATA_VERSION) {
+    cur = rec; renderAll(); fitAirport(); restoreGate();
+    if (isStale(rec) && navigator.onLine) refreshInBackground(code, token);
+    else if (!navigator.onLine) renderStatus("Offline · showing your saved copy");
+    return;
+  }
+  // nothing saved yet → need network
+  Object.values(layers).forEach(l => map.removeLayer(l)); layers = {};
+  $("items").innerHTML = ""; $("tabs").innerHTML = ""; $("levels").classList.add("hidden");
+  if (meta) map.setView([39.8, -98.6], 4);
+  if (!navigator.onLine) {
+    $("status").textContent = "";
+    $("items").innerHTML = `<div class="thin">You're offline and ${code} isn't saved yet. Open it once with signal (or use "Download all" on the home screen) and it will work offline after that.</div>`;
+    return;
+  }
+  showLoading(`Loading ${code} terminal map…`);
+  try {
+    rec = await fetchAirport(code);
+    if (token !== loadToken) return;
+    cur = rec; renderAll(); fitAirport(); refreshSaved();
+  } catch (e) {
+    if (token !== loadToken) return;
+    $("status").textContent = "";
+    $("items").innerHTML = e.notfound
+      ? `<div class="thin">Couldn't find an airport with code ${code} in the map data. Check the code and try again.</div>`
+      : `<div class="thin">Couldn't reach the map server (${esc(e.message || "network error")}). The free map servers get busy at times — <a href="#" id="retry">try again</a>.</div>`;
+    const r = $("retry"); if (r) r.onclick = ev => { ev.preventDefault(); openAirport(code, { fromHistory: true }); };
+  } finally { if (token === loadToken) hideLoading(); }
+}
+async function refreshInBackground(code, token) {
+  renderStatus("Updating map data…");
+  try {
+    const rec = await fetchAirport(code);
+    if (token !== loadToken) return;
+    const gid = selGate && selGate.id;
+    cur = rec; renderAll();
+    if (gid) { const g = cur.feats.find(f => f.id === gid); if (g) selectGate(g); }
+  } catch { if (token === loadToken) renderStatus(); }
+}
+function restoreGate() {
+  const gid = lsGet("gate:" + cur.code, null);
+  if (!gid) return;
+  const g = cur.feats.find(f => f.id === gid);
+  if (g) selectGate(g);
+}
+function showLoading(t) { $("loadingTxt").textContent = t; $("loading").classList.remove("hidden"); }
+function hideLoading() { $("loading").classList.add("hidden"); }
+
+function goHome(fromHistory) {
+  $("airport").classList.add("hidden"); $("home").classList.remove("hidden");
+  $("menu").classList.add("hidden");
+  if (!fromHistory) history.pushState({}, "", location.pathname + location.search);
+  loadToken++; hideLoading();
+  refreshSaved();
+}
+
+function openMenu() {
+  const m = $("menu");
+  if (!m.classList.contains("hidden")) { m.classList.add("hidden"); return; }
+  if (!cur) return;
+  const L2 = externalLinks();
+  m.innerHTML = `
+    <a href="${L2.apple}" target="_blank" rel="noopener">Open in Apple Maps (indoor maps)</a>
+    <a href="${L2.google}" target="_blank" rel="noopener">Open in Google Maps</a>
+    ${L2.site ? `<a href="${esc(L2.site)}" target="_blank" rel="noopener">Airport website &amp; official map</a>` : ""}
+    <button id="mRefresh">Refresh map data now</button>
+    <a href="https://www.openstreetmap.org/#map=17/${cur.center.lat}/${cur.center.lon}" target="_blank" rel="noopener">Fix missing info on OpenStreetMap</a>`;
+  m.classList.remove("hidden");
+  $("mRefresh").onclick = () => {
+    m.classList.add("hidden");
+    if (!navigator.onLine) { renderStatus("Offline · can't refresh right now"); return; }
+    refreshInBackground(cur.code, loadToken);
+  };
+}
+
+function locateMe() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(p => {
+    const ll = [p.coords.latitude, p.coords.longitude];
+    if (meMarker) meMarker.setLatLng(ll);
+    else meMarker = L.marker(ll, { icon: L.divIcon({ className: "", html: '<div class="me"></div>', iconSize: [0, 0] }), zIndexOffset: 3000 }).addTo(map);
+    map.flyTo(ll, Math.max(map.getZoom(), 17.5), { duration: .6 });
+  }, () => renderStatus("Couldn't get your location (GPS is weak indoors)"), { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 });
+}
+
+/* ============================================================
+   wiring
+   ============================================================ */
+$("q").addEventListener("input", renderHome);
+$("q").addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const first = document.querySelector("#saved .row:not(.hidden), #all .row");
+  const code = $("q").value.trim().toUpperCase();
+  if (/^[A-Z]{3}$/.test(code)) openAirport(code); else if (first) openAirport(first.dataset.code);
+});
+document.addEventListener("click", e => {
+  const row = e.target.closest(".row[data-code]");
+  if (row) { openAirport(row.dataset.code); return; }
+  const tb = e.target.closest(".tab[data-tab]");
+  if (tb) { tab = tb.dataset.tab; lsSet("tab", tab); renderTabs(); renderList(); drawAirport(); $("items").scrollTop = 0; $("airport").classList.remove("collapsed"); return; }
+  const it = e.target.closest(".item[data-id]");
+  if (it) {
+    const f = cur.feats.find(x => x.id === it.dataset.id);
+    if (f && f.c === "gate") { selectGate(f); return; }
+    if (f) {
+      const m = markerById[f.id];
+      map.flyTo([f.lat, f.lon], Math.max(map.getZoom(), 18.5), { duration: .6 });
+      map.once("moveend", () => { map.panBy([0, sheetPx() / 2 - 60], { animate: false }); if (m) m.openPopup(); });
+    }
+    return;
+  }
+  const sg = e.target.closest("[data-gate]");
+  if (sg) { selectGate(cur.feats.find(x => x.id === sg.dataset.gate)); return; }
+  const lv = e.target.closest(".chip[data-lv]");
+  if (lv) { level = lv.dataset.lv; renderLevels(); renderTabs(); renderList(); drawAirport(); return; }
+});
+$("gq").addEventListener("input", showSuggestions);
+$("gq").addEventListener("focus", showSuggestions);
+$("gq").addEventListener("keydown", e => {
+  if (e.key === "Enter") { const m = gateMatches($("gq").value); if (m.length) selectGate(m[0]); else showSuggestions(); }
+});
+$("gx").onclick = () => { selectGate(null); };
+$("back").onclick = () => goHome();
+$("more").onclick = openMenu;
+$("locate").onclick = locateMe;
+$("handle").onclick = () => { $("airport").classList.toggle("collapsed"); setTimeout(() => map && map.invalidateSize(), 300); };
+$("bulkGo").onclick = bulkDownload;
+$("bulkStop").onclick = () => { bulkStop = true; $("bulkTxt").textContent = "Stopping after this airport…"; };
+window.addEventListener("online", setNet); window.addEventListener("offline", setNet);
+window.addEventListener("popstate", e => {
+  const code = (location.hash || "").slice(1).toUpperCase();
+  if (/^[A-Z]{3}$/.test(code)) openAirport(code, { fromHistory: true }); else goHome(true);
+});
+
+/* boot */
+setNet();
+refreshSaved().then(() => {
+  const code = (location.hash || "").slice(1).toUpperCase();
+  if (/^[A-Z]{3}$/.test(code)) openAirport(code, { fromHistory: true });
+});
+renderHome();
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+}
+</script>
+</body>
+</html>

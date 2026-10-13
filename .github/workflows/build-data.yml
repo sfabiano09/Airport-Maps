@@ -1,0 +1,63 @@
+name: Build airport data
+
+# Every Monday, rebuild each airport's map from OpenStreetMap + Overture Maps (+ Wikidata websites).
+# Can also be run by hand from the Actions tab, optionally for a few airports (e.g. "IND BWI").
+on:
+  schedule:
+    - cron: "17 7 * * 1"
+  workflow_dispatch:
+    inputs:
+      airports:
+        description: "Airport codes to rebuild (blank = all)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-data
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      CODES: ${{ github.event.inputs.airports }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install DuckDB
+        run: pip install duckdb
+
+      - name: Find airports in OpenStreetMap + official websites
+        run: node scripts/build.js lookup $CODES
+
+      - name: Pull Overture Maps places
+        # if Overture is unreachable this week, still publish OpenStreetMap data
+        continue-on-error: true
+        run: python scripts/overture.py $CODES
+
+      - name: Build merged airport files
+        run: node scripts/build.js build $CODES
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Weekly airport data update"
+            git push
+          fi
