@@ -1352,7 +1352,7 @@
    "walkNodes": 25
   },
   "PLS": {
-   "generated": "2026-10-13T17:19:56.918Z",
+   "generated": "2026-10-13T20:24:40.514Z",
    "counts": {
     "ground": 10,
     "food": 2,
@@ -1764,10 +1764,9 @@
    "walkNodes": 2636
   }
  },
- "generated": "2026-10-13T20:01:21.150Z",
+ "generated": "2026-10-13T20:24:40.514Z",
  "overtureRelease": "2026-09-23.1",
  "failed": [
-  "PBI",
-  "PLS"
+  "PBI"
  ]
 }
