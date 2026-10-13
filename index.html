@@ -137,6 +137,11 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .tab{height:38px;padding:0 10px;border-radius:10px;font-weight:620;font-size:14.5px;color:var(--ink-2);display:flex;align-items:center;gap:7px;white-space:nowrap;flex:none}
 .tab i{width:8px;height:8px;border-radius:50%}
 .tab small{font-weight:600;color:var(--ink-3);font-size:12px}
+.achips{display:flex;gap:6px;padding:0 12px 8px;overflow-x:auto;flex:none;scrollbar-width:none;touch-action:pan-x}
+.achips::-webkit-scrollbar{display:none}
+.achip{height:30px;max-width:190px;overflow:hidden;text-overflow:ellipsis;padding:0 11px;border-radius:15px;border:1px solid var(--line);font-size:13.5px;font-weight:620;color:var(--ink-2);white-space:nowrap;flex:none;background:var(--surface)}
+.achip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#airport.collapsed:not(.dragging) .achips{visibility:hidden}
 .tab.on{background:var(--surface-2);color:var(--ink)}
 .status{padding:0 16px 6px;font-size:12px;color:var(--ink-3);flex:none}
 .status.warn{color:var(--accent)}
@@ -260,6 +265,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
   <div class="sheet" id="sheet">
     <button class="handle" id="handle" aria-label="Expand or collapse list"><i></i></button>
     <div class="tabs" id="tabs"></div>
+    <div class="achips hidden" id="areas"></div>
     <div class="status" id="status"></div>
     <div class="items" id="items"></div>
   </div>
@@ -524,6 +530,86 @@ function zoomClasses() {
 function levelsOf(f) { return f.lv ? String(f.lv).split(/[;,]/).map(s => s.trim()).filter(Boolean) : []; }
 function onLevel(f) { if (level === "all") return true; const l = levelsOf(f); return !l.length || l.includes(level); }
 
+/* ---------- Terminal / concourse filter ----------
+   Each place is assigned to a terminal or concourse:
+   1) by the named terminal/concourse outlines on the map ("Concourse B", "Terminal 1") — smallest outline containing it wins;
+   2) otherwise by the letter of the nearest gate ("B12" → B gates), for airports whose outlines aren't named.
+   Places we can't place confidently stay visible only under "All terminals". */
+let area = "all";
+function ringArea(r) { let a = 0; for (let i = 0, j = r.length - 1; i < r.length; j = i++) a += (r[j][1] + r[i][1]) * (r[j][0] - r[i][0]); return Math.abs(a / 2); }
+function inRing(r, la, lo) {
+  let inside = false;
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const [yi, xi] = r[i], [yj, xj] = r[j];
+    if ((yi > la) !== (yj > la) && lo < (xj - xi) * (la - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+// distance in meters from a point to the nearest edge of an outline
+function ringDist(r, p) {
+  const kx = 111320 * Math.cos(p.lat * Math.PI / 180), ky = 110540;
+  let best = Infinity;
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const ax = (r[j][1] - p.lon) * kx, ay = (r[j][0] - p.lat) * ky, bx = (r[i][1] - p.lon) * kx, by = (r[i][0] - p.lat) * ky;
+    const dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy;
+    const t = L2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / L2)) : 0;
+    best = Math.min(best, Math.hypot(ax + t * dx, ay + t * dy));
+  }
+  return best;
+}
+const gateLetter = g => { const m = /^([A-Z]{1,2})[ -]?\d/i.exec(String(g.refs && g.refs[0] || g.n || "")); return m ? m[1].toUpperCase() : null; };
+function computeAreas() {
+  if (cur._areasFor === cur) return;
+  cur._areasFor = cur;
+  // outlines that aren't passenger areas (cargo, private aviation, skylights…) don't become filters
+  const NOT_PAX = /cargo|hangar|\bfbo\b|aviation|helicop|heli|tours|fedex|\bfdx\b|\bups\b|\bdhl\b|freight|maintenance|skylight|garage|parking|car rental|royal suite|private|executive|general aviation|catering/i;
+  const named = cur.polys.filter(p => p.k === "terminal" && p.n && p.n.trim() && !NOT_PAX.test(p.n));
+  const names = new Set(named.map(p => p.n.trim()));
+  const gates = cur.feats.filter(f => f.c === "gate");
+  const letters = new Set(gates.map(gateLetter).filter(Boolean));
+  let mode = names.size >= 2 ? "poly" : letters.size >= 2 ? "gate" : null;
+  const rings = named.map(p => ({ name: p.n.trim(), r: p.r, a: ringArea(p.r) }));
+  for (const f of cur.feats) {
+    f._a = null;
+    if (mode === "poly") {
+      let best = null;
+      for (const R of rings) if (inRing(R.r, f.lat, f.lon) && (!best || R.a < best.a)) best = R;
+      if (!best) {   // just outside an outline (e.g. a gate at the jet bridge)? use the closest one within 60 m
+        let bd = 60;
+        for (const R of rings) { const d = ringDist(R.r, f); if (d < bd) { bd = d; best = R; } }
+      }
+      if (best) f._a = best.name;
+    } else if (mode === "gate") {
+      if (f.c === "gate") { const L2 = gateLetter(f); if (L2) f._a = `${L2} gates`; continue; }
+      let bg = null, bd = 220;
+      for (const g of gates) { const d = meters(f, g); if (d < bd && gateLetter(g)) { bd = d; bg = g; } }
+      if (bg) f._a = `${gateLetter(bg)} gates`;
+    }
+  }
+  const counts = {};
+  cur.feats.forEach(f => { if (f._a) counts[f._a] = (counts[f._a] || 0) + 1; });
+  cur._areas = Object.keys(counts).filter(k => counts[k] >= 2).sort(natural);
+  if (cur._areas.length < 2) cur._areas = [];
+}
+// "Indianapolis International Airport - Colonel H. Weir Cook Passenger Terminal" → "Colonel H. Weir Cook Passenger Terminal"
+const areaLabel = a => a.length > 22 && /\s[-–]\s/.test(a) ? a.split(/\s[-–]\s/).pop() : a;
+function inArea(f) { return area === "all" || f._a === area; }
+function renderAreas() {
+  computeAreas();
+  const box = $("areas");
+  if (!cur._areas.length) { box.classList.add("hidden"); area = "all"; return; }
+  if (area !== "all" && !cur._areas.includes(area)) area = "all";
+  box.classList.remove("hidden");
+  box.innerHTML = [`<button class="achip${area === "all" ? " on" : ""}" data-area="all">All terminals</button>`]
+    .concat(cur._areas.map(a => `<button class="achip${area === a ? " on" : ""}" data-area="${esc(a)}">${esc(areaLabel(a))}</button>`)).join("");
+}
+function zoomToArea() {
+  if (area === "all") { fitAirport(); return; }
+  const pts = cur.feats.filter(f => f._a === area).map(f => [f.lat, f.lon]);
+  cur.polys.forEach(p => { if (p.k === "terminal" && p.n && p.n.trim() === area) p.r.forEach(x => pts.push(x)); });
+  if (pts.length) map.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [16, 170], paddingBottomRight: [16, 16 + sheetPx()], maxZoom: 18.5 });
+}
+
 const subLabel = f => {
   if (f.c !== "lounge") return f.s;
   const prog = loungeProgram(f.n, f.s);
@@ -562,7 +648,8 @@ function drawAirport() {
   markerById = {};
   const termStyle = { color: cssVar("--terminal-line"), weight: 1.5, fillColor: cssVar("--terminal"), fillOpacity: .3 };
   const indoorStyle = { color: cssVar("--indoor"), weight: 1, fill: false, opacity: .7 };
-  cur.polys.forEach(p => L.polygon(p.r, p.k === "terminal" ? termStyle : indoorStyle).addTo(layers.polys));
+  const selStyle = { ...termStyle, color: cssVar("--accent"), weight: 2.5, fillOpacity: .18, fillColor: cssVar("--accent") };
+  cur.polys.forEach(p => L.polygon(p.r, p.k !== "terminal" ? indoorStyle : (area !== "all" && p.n && p.n.trim() === area ? selStyle : termStyle)).addTo(layers.polys));
   for (const f of cur.feats) {
     if (!onLevel(f)) continue;
     let m;
@@ -574,7 +661,7 @@ function drawAirport() {
       m.addTo(layers.landmarks);
     } else {
       // gates and landmarks always stay on the map; places follow the selected tab
-      if (!inTab(f)) continue;
+      if (!inTab(f) || !inArea(f)) continue;
       const col = cssVar(CATS.find(c => c.k === f.c).color);
       m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<div class="pw"><div class="pm${f.ap ? " ap" : ""}" style="${f.ap ? "border-color:" + col : "background:" + col}"></div>${f.n || f.c === "restroom" ? `<span class="pl">${esc(f.c === "lounge" ? f.n : (f.n || f.s))}</span>` : ""}</div>`, iconSize: [0, 0] }), zIndexOffset: f.c === tab ? 300 : 0 });
       m.addTo(layers.pois);
@@ -610,7 +697,7 @@ function renderLevels() {
 
 function renderTabs() {
   const counts = {};
-  cur.feats.forEach(f => { if (onLevel(f)) { counts[f.c] = (counts[f.c] || 0) + 1; if (PLACE_CATS.has(f.c)) counts.all = (counts.all || 0) + 1; } });
+  cur.feats.forEach(f => { if (onLevel(f) && inArea(f)) { counts[f.c] = (counts[f.c] || 0) + 1; if (PLACE_CATS.has(f.c)) counts.all = (counts.all || 0) + 1; } });
   const allDot = "conic-gradient(var(--c-food) 0 20%, var(--c-shop) 0 40%, var(--c-restroom) 0 60%, var(--c-lounge) 0 80%, var(--c-ground) 0)";
   $("tabs").innerHTML = CATS.map(c => `<button class="tab${tab === c.k ? " on" : ""}" data-tab="${c.k}">
     <i style="background:${c.color ? `var(${c.color})` : allDot}"></i>${c.label}<small>${counts[c.k] || 0}</small></button>`).join("");
@@ -710,7 +797,7 @@ function drawRoute(f) {
 }
 
 function renderList() {
-  const items = cur.feats.filter(f => inTab(f) && onLevel(f));
+  const items = cur.feats.filter(f => inTab(f) && onLevel(f) && inArea(f));
   const from = origin();
   if (tab === "gate") items.sort((a, b) => natural(a.n, b.n));
   else if (from) items.forEach(f => f._w = walkInfo(f)), items.sort((a, b) => a._w.sec - b._w.sec);
@@ -759,7 +846,8 @@ function externalLinks() {
 function thinNote(k, partial) {
   const L2 = externalLinks();
   const what = { all: "places", food: "food", shop: "shops", restroom: "restrooms", lounge: "lounges", ground: "ground transport", gate: "gates" }[k];
-  const lead = partial ? `Only a few ${what} are mapped here, so the list may be incomplete.` : `No ${what} are mapped at this airport${level !== "all" ? " on this level" : ""}.`;
+  const where = area !== "all" ? ` in ${area}` : level !== "all" ? " on this level" : " at this airport";
+  const lead = partial ? `Only a few ${what} are mapped${area !== "all" ? " in " + area : " here"}, so the list may be incomplete.` : `No ${what} are mapped${where}.`;
   return `<div class="thin">${lead} Try <a href="${L2.apple}" target="_blank" rel="noopener">Apple Maps</a>, which has indoor maps for many big airports${L2.site ? `, or the <a href="${esc(L2.site)}" target="_blank" rel="noopener">airport's website</a>` : ""}.</div>`;
 }
 
@@ -785,7 +873,7 @@ function renderStatus(extra) {
 function renderAll() {
   $("apTitle").textContent = `${cur.code} · ${cur.name}`;
   $("apSub").textContent = cur.city || cur.osmName || "";
-  renderLevels(); renderTabs(); renderList(); renderStatus();
+  renderLevels(); renderAreas(); renderTabs(); renderList(); renderStatus();
   drawAirport();
 }
 
@@ -847,7 +935,7 @@ async function openAirport(code, opts = {}) {
   const recents = lsGet("recents", []).filter(c => c !== code); recents.unshift(code); lsSet("recents", recents.slice(0, 30));
   ensureMap();
   setTimeout(() => map.invalidateSize(), 50);
-  selGate = null; level = "all"; $("gq").value = ""; $("gx").classList.add("hidden"); $("menu").classList.add("hidden");
+  selGate = null; level = "all"; area = lsGet("area:" + code, "all"); $("gq").value = ""; $("gx").classList.add("hidden"); $("menu").classList.add("hidden");
 
   const meta = BY_CODE[code];
   $("apTitle").textContent = meta ? `${code} · ${meta.name}` : code;
@@ -1009,6 +1097,12 @@ document.addEventListener("click", e => {
   if (sg) { selectGate(cur.feats.find(x => x.id === sg.dataset.gate)); return; }
   const lv = e.target.closest(".chip[data-lv]");
   if (lv) { level = lv.dataset.lv; renderLevels(); renderTabs(); renderList(); drawAirport(); return; }
+  const ar = e.target.closest(".achip[data-area]");
+  if (ar) {
+    area = ar.dataset.area; lsSet("area:" + cur.code, area);
+    renderAreas(); renderTabs(); renderList(); renderStatus(); drawAirport(); zoomToArea(); $("items").scrollTop = 0;
+    return;
+  }
 });
 $("gq").addEventListener("input", showSuggestions);
 $("gq").addEventListener("focus", showSuggestions);

@@ -1,6 +1,6 @@
 // Airport Maps service worker: keeps the app and map tiles you've viewed available offline.
 // Airport data itself is stored by the page in IndexedDB, so data/*.json always goes to the network.
-const SHELL = "am-shell-v11";
+const SHELL = "am-shell-v12";
 const TILES = "am-tiles-v1";
 const MAX_TILES = 3000;
 const LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/";
