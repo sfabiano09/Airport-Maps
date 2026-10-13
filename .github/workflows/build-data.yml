@@ -27,6 +27,8 @@ jobs:
       CODES: ${{ github.event.inputs.airports }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the data commit can be rebased onto newer app changes
 
       - uses: actions/setup-node@v4
         with:
@@ -63,5 +65,9 @@ jobs:
             echo "No changes"
           else
             git commit -m "Weekly airport data update"
-            git push
+            # the app may have been updated while this ran: replay the data commit on top of them (up to 3 tries)
+            for i in 1 2 3; do
+              git pull --rebase -X theirs origin main && git push && break
+              sleep 15
+            done
           fi
