@@ -94,7 +94,11 @@ async function build(codes) {
   const now = new Date().toISOString();
   const failed = [];
 
-  for (const code of codes) {
+  // second pass: airports that failed the first time (busy map server) get another try after a pause
+  let queue = codes.slice();
+  for (let pass = 1; pass <= 2 && queue.length; pass++) {
+  if (pass === 2) { console.log(`Retrying ${queue.length} airports after a pause: ${queue.join(", ")}`); await sleep(120000); failed.length = 0; }
+  for (const code of queue) {
     const ap = meta[code];
     if (!ap) { failed.push(code); continue; }
     try {
@@ -122,6 +126,8 @@ async function build(codes) {
       console.log(`${code}: build failed — ${e.message} (keeping last week's file if there is one)`);
     }
     await sleep(3000);
+  }
+  queue = failed.slice();
   }
   index.generated = now;
   index.overtureRelease = release;
