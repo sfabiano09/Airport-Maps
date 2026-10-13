@@ -214,7 +214,7 @@ function featureQuery(ap, opts = {}) {
   nwr["amenity"~"^(restaurant|cafe|fast_food|bar|pub|food_court|ice_cream|toilets|lounge)$"](${IN});
   nwr["shop"~"^(coffee|bakery|deli)$"](${IN});
   nwr["lounge"](${IN});
-  nwr["name"~"lounge|club|security|checkpoint|tsa|baggage|bag claim|rideshare|ride share|ride app|uber|lyft|ticketing",i](${IN});
+  nwr["name"~"lounge|club|centurion|sapphire|polaris|security|checkpoint|tsa|baggage|bag claim|rideshare|ride share|ride app|uber|lyft|ticketing",i](${IN});
   way["indoor"~"^(area|corridor)$"](${IN});
   nwr["amenity"~"^(car_rental|taxi|bus_station)$"](${OUT});
   nwr["railway"~"^(station|halt)$"](${OUT});
@@ -228,7 +228,7 @@ out geom${opts.meta === false ? "" : " meta"} qt;`;
 /* ---------------- Processing raw OSM → app features ---------------- */
 const FOOD = new Set(["restaurant", "cafe", "fast_food", "bar", "pub", "food_court", "ice_cream", "biergarten"]);
 const FOOD_LABEL = { restaurant: "Restaurant", cafe: "Café", fast_food: "Quick bite", bar: "Bar", pub: "Pub", food_court: "Food court", ice_cream: "Ice cream", biergarten: "Beer garden" };
-const LOUNGE_RE = /(lounge|admirals club|sky ?club|united club|centurion|polaris|flagship|priority pass|\bthe club\b|delta one|capital one|chase sapphire|\buso\b|amex)/i;
+const LOUNGE_RE = /(lounge|admirals club|sky ?club|united club|centurion|polaris|flagship|priority pass|\bthe club\b|delta one|capital ?one|sapphire|\buso\b|amex|clubhouse|plaza premium|escape|airspace|aspire)/i;
 const RIDE_RE = /(ride ?share|ride app|\buber\b|\blyft\b|\btnc\b|app-based)/i;
 
 function categorize(t) {
@@ -431,11 +431,31 @@ function anchorPoints(feats, polys) {
   return anchors;
 }
 
+/* Which lounge network a lounge belongs to, from its name/operator — so "Sky Club" shows as Delta,
+   "Centurion" as Amex, etc. Only names the program; access rules change too often to hard-code. */
+const LOUNGE_PROGRAMS = [
+  [/delta one/i, "Delta One Lounge"], [/sky ?club/i, "Delta Sky Club"],
+  [/centurion/i, "Amex Centurion Lounge"], [/sapphire/i, "Chase Sapphire Lounge"], [/capital ?one/i, "Capital One Lounge"],
+  [/flagship/i, "American Flagship Lounge"], [/admirals/i, "American Admirals Club"],
+  [/polaris/i, "United Polaris Lounge"], [/united club/i, "United Club"], [/alaska/i, "Alaska Lounge"],
+  [/priority pass/i, "Priority Pass"], [/escape/i, "Escape Lounge"], [/airspace/i, "Airspace Lounge"],
+  [/plaza premium/i, "Plaza Premium Lounge"], [/aspire/i, "Aspire Lounge"], [/\buso\b/i, "USO (military)"],
+  [/british airways|galleries|concorde room/i, "British Airways"], [/virgin|clubhouse/i, "Virgin Atlantic Clubhouse"],
+  [/air france|\bsalon\b/i, "Air France"], [/lufthansa|senator/i, "Lufthansa"], [/klm|crown lounge/i, "KLM Crown Lounge"],
+  [/aer lingus/i, "Aer Lingus"], [/star alliance/i, "Star Alliance"], [/oneworld/i, "oneworld"],
+  [/^the club\b/i, "The Club"],
+];
+function loungeProgram(name, operator) {
+  const s = `${name || ""} ${operator || ""}`;
+  for (const [re, label] of LOUNGE_PROGRAMS) if (re.test(s)) return label;
+  return "";
+}
+
 const AIRPORTS = AIRPORT_DATA.trim().split("\n").map(l => {
   const [code, name, city, st, wn] = l.split("|");
   return { code, name, city, st, wn: wn === "1" };
 });
 
-return { AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
+return { loungeProgram, AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
   categorize, processOSM, categorizeOverture, sameName, mergeOverture, anchorPoints, MIN_CONF };
 });

@@ -20,7 +20,7 @@
   --bg:#f6f5f1; --surface:#ffffff; --surface-2:#efede7; --line:#dedad0;
   --ink:#1b1d21; --ink-2:#5b5f66; --ink-3:#8a8e95;
   --accent:#d6451b; --accent-ink:#ffffff;
-  --map-bg:#e9e6de; --terminal:#c9c3b3; --terminal-line:#8f8877; --indoor:#b3ac9b;
+  --map-bg:#e9e6de; --terminal:#f3f0e8; --terminal-line:#b9b2a2; --indoor:#d6d0c2;
   --c-gate:#1b1d21; --c-food:#d97706; --c-restroom:#2563eb; --c-lounge:#7c3aed; --c-ground:#15803d; --c-landmark:#6b7280;
   --shadow:0 6px 24px rgba(20,20,20,.12),0 1px 3px rgba(20,20,20,.08);
   --r:14px;
@@ -31,7 +31,7 @@
     --bg:#16181c; --surface:#202328; --surface-2:#2a2e34; --line:#363a41;
     --ink:#eef0f2; --ink-2:#a9aeb6; --ink-3:#7c818a;
     --accent:#ff6a3d; --accent-ink:#16181c;
-    --map-bg:#1d2024; --terminal:#3a3f47; --terminal-line:#6b7380; --indoor:#4d535c;
+    --map-bg:#1d2024; --terminal:#565d68; --terminal-line:#8a93a0; --indoor:#5f6772;
     --c-gate:#eef0f2; --c-food:#f59e0b; --c-restroom:#60a5fa; --c-lounge:#a78bfa; --c-ground:#4ade80; --c-landmark:#9ca3af;
     --shadow:0 6px 24px rgba(0,0,0,.45),0 1px 3px rgba(0,0,0,.4);
   }
@@ -40,7 +40,7 @@
   --bg:#16181c; --surface:#202328; --surface-2:#2a2e34; --line:#363a41;
   --ink:#eef0f2; --ink-2:#a9aeb6; --ink-3:#7c818a;
   --accent:#ff6a3d; --accent-ink:#16181c;
-  --map-bg:#1d2024; --terminal:#3a3f47; --terminal-line:#6b7380; --indoor:#4d535c;
+  --map-bg:#1d2024; --terminal:#565d68; --terminal-line:#8a93a0; --indoor:#5f6772;
   --c-gate:#eef0f2; --c-food:#f59e0b; --c-restroom:#60a5fa; --c-lounge:#a78bfa; --c-ground:#4ade80; --c-landmark:#9ca3af;
   --shadow:0 6px 24px rgba(0,0,0,.45),0 1px 3px rgba(0,0,0,.4);
 }
@@ -92,8 +92,8 @@ button{cursor:pointer;border:0;background:none;padding:0}
 #airport{position:fixed;inset:0;display:flex;flex-direction:column}
 #map{position:absolute;inset:0;background:var(--map-bg)}
 .leaflet-container{background:var(--map-bg);font:inherit}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}}
-:root[data-theme="dark"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(1) contrast(.95)}}
+:root[data-theme="dark"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(1) contrast(.95)}
 .top{position:absolute;left:0;right:0;top:0;z-index:1000;padding:calc(var(--safe-t) + 10px) 12px 0;pointer-events:none}
 .top > *{pointer-events:auto}
 .titlebar{display:flex;align-items:center;gap:8px}
@@ -159,6 +159,12 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .hide-gates .gp:not(.sel){display:none}
 .pm{width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-50%,-50%)}
 .pm.ap{background:var(--surface);border-style:dashed;border-width:2px;opacity:.9}
+.pw{position:relative;transform:translate(-50%,-50%);display:inline-block}
+.pw .pm{transform:none}
+.pl{position:absolute;left:14px;top:50%;transform:translateY(-50%);white-space:nowrap;font:650 12px/1.15 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+  color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 6px;box-shadow:0 1px 3px rgba(0,0,0,.18);
+  max-width:150px;overflow:hidden;text-overflow:ellipsis;display:none}
+.show-labels .pl{display:block}
 .hide-pois .pm{width:10px;height:10px;border-width:1.5px}
 .lm{font-size:11px;font-weight:700;color:var(--c-landmark);background:var(--surface);border-radius:5px;padding:2px 5px;white-space:nowrap;transform:translate(-50%,-50%);display:inline-block;border:1px solid var(--line)}
 .hide-gates .lm{display:none}
@@ -253,7 +259,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 
 <script>
 "use strict";
-const { AIRPORT_DATA, OVERPASS, meters, lookupAerodrome, featureQuery, processOSM } = AirportCore;
+const { loungeProgram, AIRPORT_DATA, OVERPASS, meters, lookupAerodrome, featureQuery, processOSM } = AirportCore;
 /* ============================================================
    Airport list — every US airport Southwest serves (Oct 2026)
    plus the major hubs it doesn't. WN = Southwest.
@@ -496,11 +502,13 @@ function zoomClasses() {
   const z = map.getZoom(), el = $("map");
   el.classList.toggle("hide-gates", z < 16.5);
   el.classList.toggle("hide-pois", z < 16);
+  el.classList.toggle("show-labels", z >= 17.5);
 }
 
 function levelsOf(f) { return f.lv ? String(f.lv).split(/[;,]/).map(s => s.trim()).filter(Boolean) : []; }
 function onLevel(f) { if (level === "all") return true; const l = levelsOf(f); return !l.length || l.includes(level); }
 
+const subLabel = f => f.c === "lounge" ? (loungeProgram(f.n, f.s) || f.s) : f.s;
 function srcNote(f) {
   const when = f.u ? ` · updated ${f.u.slice(0, 7)}` : "";
   if (f.cl) return "May have closed (business listing says closed)" + when;
@@ -510,7 +518,7 @@ function srcNote(f) {
 }
 function popupHtml(f) {
   const bits = [`<b>${esc(f.c === "gate" ? "Gate " + f.n : (f.n || f.s))}</b>`];
-  if (f.c !== "gate" && f.n) bits.push(`<div class="s">${esc(f.s)}</div>`);
+  if (f.c !== "gate" && f.n) bits.push(`<div class="s">${esc(subLabel(f))}</div>`);
   if (f.lv) bits.push(`<div class="s">Level ${esc(f.lv)}</div>`);
   if (f.h) bits.push(`<div class="s">Hours: ${esc(f.h)}</div>`);
   const src = srcNote(f);
@@ -525,7 +533,7 @@ function drawAirport() {
   Object.values(layers).forEach(l => map.removeLayer(l));
   layers = { polys: L.layerGroup(), pois: L.layerGroup(), gates: L.layerGroup(), landmarks: L.layerGroup() };
   markerById = {};
-  const termStyle = { color: cssVar("--terminal-line"), weight: 1.5, fillColor: cssVar("--terminal"), fillOpacity: .55 };
+  const termStyle = { color: cssVar("--terminal-line"), weight: 1.5, fillColor: cssVar("--terminal"), fillOpacity: .3 };
   const indoorStyle = { color: cssVar("--indoor"), weight: 1, fill: false, opacity: .7 };
   cur.polys.forEach(p => L.polygon(p.r, p.k === "terminal" ? termStyle : indoorStyle).addTo(layers.polys));
   for (const f of cur.feats) {
@@ -539,7 +547,7 @@ function drawAirport() {
       m.addTo(layers.landmarks);
     } else {
       const col = cssVar(CATS.find(c => c.k === f.c).color);
-      m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<div class="pm${f.ap ? " ap" : ""}" style="${f.ap ? "border-color:" + col : "background:" + col}"></div>`, iconSize: [0, 0] }), zIndexOffset: f.c === tab ? 300 : 0 });
+      m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<div class="pw"><div class="pm${f.ap ? " ap" : ""}" style="${f.ap ? "border-color:" + col : "background:" + col}"></div>${f.n || f.c === "restroom" ? `<span class="pl">${esc(f.c === "lounge" ? f.n : (f.n || f.s))}</span>` : ""}</div>`, iconSize: [0, 0] }), zIndexOffset: f.c === tab ? 300 : 0 });
       m.addTo(layers.pois);
     }
     m.bindPopup(() => popupHtml(f), { offset: [0, -4], autoPanPaddingTopLeft: [10, 170], autoPanPaddingBottomRight: [10, 20] });
@@ -585,7 +593,7 @@ function renderList() {
 
   let html = items.map(f => {
     const title = f.c === "gate" ? "Gate " + f.n : (f.n || f.s);
-    const sub = [f.c === "gate" ? "" : (f.n ? f.s : ""), f.lv ? "Level " + f.lv : "", f.h ? f.h : "",
+    const sub = [f.c === "gate" ? "" : (f.n ? subLabel(f) : ""), f.lv ? "Level " + f.lv : "", f.h ? f.h : "",
       f.ap ? "location approximate" : "", f.cl ? "may have closed" : ""].filter(Boolean).join(" · ");
     const dist = from && f.c !== "gate" ? `<span class="dist">~${walkMin(f._d)} min</span>` : "";
     const col = CATS.find(c => c.k === f.c).color;
