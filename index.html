@@ -125,9 +125,13 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .sheet{position:absolute;left:0;right:0;bottom:0;z-index:1000;background:var(--surface);border-radius:18px 18px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.14);
   height:var(--sheet-h);display:flex;flex-direction:column;transition:height .25s;padding-bottom:var(--safe-b)}
 #airport{--sheet-h:42vh}
-#airport.collapsed{--sheet-h:118px}
-.handle{height:22px;display:grid;place-items:center;flex:none}
-.handle i{width:40px;height:5px;border-radius:3px;background:var(--line)}
+#airport.collapsed{--sheet-h:calc(74px + var(--safe-b))}
+#airport.collapsed:not(.dragging) .status,#airport.collapsed:not(.dragging) .items{visibility:hidden}
+#airport.tall{--sheet-h:78vh}
+#airport.dragging .sheet,#airport.dragging .locate,#airport.dragging .leaflet-bottom{transition:none}
+.handle{height:26px;display:grid;place-items:center;flex:none;width:100%;touch-action:none;cursor:grab}
+.handle i{width:44px;height:5px;border-radius:3px;background:var(--ink-3);opacity:.55}
+.sheet .tabs{touch-action:pan-x}
 .tabs{display:flex;gap:2px;padding:0 8px 8px;overflow-x:auto;flex:none;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{height:38px;padding:0 10px;border-radius:10px;font-weight:620;font-size:14.5px;color:var(--ink-2);display:flex;align-items:center;gap:7px;white-space:nowrap;flex:none}
@@ -989,7 +993,7 @@ document.addEventListener("click", e => {
   const row = e.target.closest(".row[data-code]");
   if (row) { openAirport(row.dataset.code); return; }
   const tb = e.target.closest(".tab[data-tab]");
-  if (tb) { tab = tb.dataset.tab; lsSet("tab2", tab); renderTabs(); renderList(); drawAirport(); $("items").scrollTop = 0; $("airport").classList.remove("collapsed"); return; }
+  if (tb) { tab = tb.dataset.tab; lsSet("tab2", tab); renderTabs(); renderList(); drawAirport(); $("items").scrollTop = 0; if (sheetState() === "collapsed") setSheet("half"); return; }
   const it = e.target.closest(".item[data-id]");
   if (it) {
     const f = cur.feats.find(x => x.id === it.dataset.id);
@@ -1015,7 +1019,62 @@ $("gx").onclick = () => { selectGate(null); };
 $("back").onclick = () => goHome();
 $("more").onclick = openMenu;
 $("locate").onclick = locateMe;
-$("handle").onclick = () => { $("airport").classList.toggle("collapsed"); setTimeout(() => map && map.invalidateSize(), 300); };
+/* ---------- bottom sheet: drag the handle or tab row down to see more map, up to see more list ----------
+   Three positions: collapsed (just the tabs), half (default), tall. Tapping the handle toggles collapsed/half. */
+const SHEET_STATES = ["collapsed", "half", "tall"];
+function sheetState() { const a = $("airport"); return a.classList.contains("collapsed") ? "collapsed" : a.classList.contains("tall") ? "tall" : "half"; }
+function setSheet(st) {
+  const a = $("airport");
+  a.classList.toggle("collapsed", st === "collapsed");
+  a.classList.toggle("tall", st === "tall");
+  try { localStorage.setItem("sheet", st); } catch {}
+  setTimeout(() => map && map.invalidateSize(), 300);
+}
+(() => {
+  const sheet = $("sheet"), a = $("airport");
+  let y0 = null, x0 = 0, h0 = 0, dragging = false, moved = false, t0 = 0;
+  const heights = () => ({ collapsed: 74, half: innerHeight * .42, tall: innerHeight * .78 });
+  const start = e => {
+    if (e.target.closest(".items")) return;         // the list itself scrolls normally
+    const p = e.touches ? e.touches[0] : e;
+    y0 = p.clientY; x0 = p.clientX; h0 = sheet.getBoundingClientRect().height; dragging = false; moved = false; t0 = Date.now();
+  };
+  const move = e => {
+    if (y0 === null) return;
+    const p = e.touches ? e.touches[0] : e, dy = p.clientY - y0, dx = p.clientX - x0;
+    if (!dragging) {
+      if (Math.abs(dy) < 8 || Math.abs(dy) < Math.abs(dx)) return;   // horizontal swipes still scroll the tabs
+      dragging = true; a.classList.add("dragging");
+    }
+    moved = true;
+    if (e.cancelable) e.preventDefault();
+    const h = Math.max(70, Math.min(innerHeight * .85, h0 - dy));
+    a.style.setProperty("--sheet-h", h + "px");
+  };
+  const end = e => {
+    if (y0 === null) return;
+    const p = e.changedTouches ? e.changedTouches[0] : e, dy = p.clientY - y0;
+    y0 = null;
+    if (!dragging) return;
+    dragging = false; a.classList.remove("dragging"); a.style.removeProperty("--sheet-h");
+    // a quick flick moves one step; a slow drag snaps to the nearest position
+    const H = heights(), cur = h0 - dy, fast = Math.abs(dy) / Math.max(1, Date.now() - t0) > 0.5;
+    let st;
+    if (fast) { const i = SHEET_STATES.indexOf(sheetState()); st = SHEET_STATES[Math.max(0, Math.min(2, i + (dy > 0 ? -1 : 1)))]; }
+    else st = SHEET_STATES.reduce((b, k) => Math.abs(H[k] - cur) < Math.abs(H[b] - cur) ? k : b, "half");
+    setSheet(st);
+  };
+  sheet.addEventListener("touchstart", start, { passive: true });
+  sheet.addEventListener("touchmove", move, { passive: false });
+  sheet.addEventListener("touchend", end);
+  sheet.addEventListener("mousedown", start);
+  addEventListener("mousemove", move);
+  addEventListener("mouseup", end);
+  // swallow the click that follows a drag so it doesn't switch tabs
+  sheet.addEventListener("click", e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+  $("handle").onclick = () => setSheet(sheetState() === "collapsed" ? "half" : "collapsed");
+  try { const st = localStorage.getItem("sheet"); if (SHEET_STATES.includes(st)) setSheet(st); } catch {}
+})();
 $("bulkGo").onclick = bulkDownload;
 $("bulkStop").onclick = () => { bulkStop = true; $("bulkTxt").textContent = "Stopping after this airport…"; };
 window.addEventListener("online", setNet); window.addEventListener("offline", setNet);
