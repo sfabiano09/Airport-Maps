@@ -513,13 +513,13 @@
    "walkNodes": 8820
   },
   "LAX": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-13T23:33:02.467Z",
    "counts": {
     "ground": 223,
     "gate": 148,
     "restroom": 42,
-    "shop": 129,
-    "food": 147,
+    "shop": 141,
+    "food": 151,
     "lounge": 39,
     "landmark": 1
    },
@@ -1764,9 +1764,7 @@
    "walkNodes": 2636
   }
  },
- "generated": "2026-10-13T20:24:40.514Z",
+ "generated": "2026-10-13T23:33:02.467Z",
  "overtureRelease": "2026-09-23.1",
- "failed": [
-  "PBI"
- ]
+ "failed": []
 }
