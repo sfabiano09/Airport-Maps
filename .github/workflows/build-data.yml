@@ -43,14 +43,18 @@ jobs:
         run: node scripts/build.js lookup $CODES
 
       - name: Pull Overture Maps places
-        # if Overture is unreachable this week, still publish OpenStreetMap data
+        # if Overture is unreachable or slow this week, still publish OpenStreetMap data
         continue-on-error: true
+        timeout-minutes: 90
         run: python scripts/overture.py $CODES
 
       - name: Build merged airport files
+        timeout-minutes: 180
         run: node scripts/build.js build $CODES
 
       - name: Commit updated data
+        # commit whatever got built, even if a later airport failed
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

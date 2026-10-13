@@ -46,6 +46,7 @@ def main():
         con.sql("INSTALL httpfs; LOAD httpfs; SET s3_region='us-west-2'; SET enable_object_cache=true;")
         src = f"read_parquet('s3://overturemaps-us-west-2/release/{release}/theme=places/type=place/*', hive_partitioning=1)"
     print("Overture release:", release, flush=True)
+    open(os.path.join(TMP, "overture_release.txt"), "w").write(release)
 
     schema = {r[0]: r[1] for r in con.sql(f"DESCRIBE SELECT * FROM {src}").fetchall()}
     has = lambda c: c in schema
@@ -87,7 +88,6 @@ def main():
         done += 1
         print(f"{code}: {len(places)} places ({time.time() - t:.0f}s)", flush=True)
 
-    open(os.path.join(TMP, "overture_release.txt"), "w").write(release if done else "")
     print(f"Overture done for {done} airports", flush=True)
 
 

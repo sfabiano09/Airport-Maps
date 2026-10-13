@@ -178,12 +178,10 @@ async function overpass(query, timeoutMs = 120000) {
   throw lastErr || new Error("Map server unreachable");
 }
 
-async function lookupAerodrome(code, run = overpass) {
-  const q = `[out:json][timeout:30];nwr["aeroway"="aerodrome"]["iata"="${code}"];out tags bb;`;
-  const j = await run(q, 25000);
-  const els = (j.elements || []).filter(e => e.tags);
+function pickAerodrome(els, code) {
+  els = (els || []).filter(e => e.tags);
   if (!els.length) return null;
-  // prefer the polygon (way/relation) over a bare node
+  // prefer the polygon (way/relation) over a bare node; the biggest outline is the airport, not a heliport
   const area = e => e.bounds ? (e.bounds.maxlat - e.bounds.minlat) * (e.bounds.maxlon - e.bounds.minlon) : 0;
   els.sort((a, b) => area(b) - area(a));
   const e = els[0];
@@ -197,6 +195,21 @@ async function lookupAerodrome(code, run = overpass) {
     bounds: b,
     center: c || { lat: (b.minlat + b.maxlat) / 2, lon: (b.minlon + b.maxlon) / 2 },
   };
+}
+async function lookupAerodrome(code, run = overpass) {
+  const q = `[out:json][timeout:30];nwr["aeroway"="aerodrome"]["iata"="${code}"];out tags bb;`;
+  const j = await run(q, 25000);
+  return pickAerodrome(j.elements, code);
+}
+// All airports in one request (used by the weekly build)
+async function lookupAerodromes(codes, run = overpass) {
+  const q = `[out:json][timeout:180];nwr["aeroway"="aerodrome"]["iata"~"^(${codes.join("|")})$"];out tags bb;`;
+  const j = await run(q, 200000);
+  const by = {};
+  for (const e of j.elements || []) if (e.tags && e.tags.iata) (by[e.tags.iata] = by[e.tags.iata] || []).push(e);
+  const out = {};
+  for (const code of codes) { const ap = pickAerodrome(by[code], code); if (ap) out[code] = ap; }
+  return out;
 }
 
 function bboxStr(b, padM = 0) {
@@ -456,6 +469,6 @@ const AIRPORTS = AIRPORT_DATA.trim().split("\n").map(l => {
   return { code, name, city, st, wn: wn === "1" };
 });
 
-return { loungeProgram, AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
+return { lookupAerodromes, loungeProgram, AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
   categorize, processOSM, categorizeOverture, sameName, mergeOverture, anchorPoints, MIN_CONF };
 });

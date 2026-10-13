@@ -58,18 +58,28 @@ async function lookup(codes) {
   let sites = {};
   try { sites = await wikidataWebsites(codes); console.log(`Wikidata: websites for ${Object.keys(sites).length} airports`); }
   catch (e) { console.log("Wikidata unavailable:", e.message); }
+  // one request for every airport; then individual retries only for any the batch missed
+  let found = {};
+  try { found = await withRetry("batch lookup", () => core.lookupAerodromes(codes)); }
+  catch (e) { console.log("Batch lookup failed:", e.message); }
+  // reuse last week's outlines for anything still missing (airports don't move)
+  let prev = {};
+  try { prev = JSON.parse(fs.readFileSync(path.join(DATA, "meta.json"), "utf8")); } catch {}
   for (const code of codes) {
-    try {
-      const ap = await withRetry(code, () => core.lookupAerodrome(code));
-      if (!ap) { console.log(`${code}: not found in OpenStreetMap`); continue; }
-      ap.website = sites[code] || ap.website || "";
-      ap.websiteSource = sites[code] ? "wikidata" : ap.website ? "osm" : "";
-      meta[code] = ap;
-      console.log(`${code}: ${ap.name}`);
-    } catch (e) { console.log(`${code}: lookup failed — ${e.message}`); }
-    await sleep(2000);
+    let ap = found[code];
+    if (!ap && prev[code]) { ap = prev[code]; console.log(`${code}: using saved outline`); }
+    if (!ap) {
+      try { ap = await withRetry(code, () => core.lookupAerodrome(code), 2); await sleep(2000); }
+      catch (e) { console.log(`${code}: lookup failed — ${e.message}`); }
+    }
+    if (!ap) { console.log(`${code}: not found in OpenStreetMap`); continue; }
+    ap.website = sites[code] || ap.website || "";
+    ap.websiteSource = sites[code] ? "wikidata" : ap.website ? "osm" : "";
+    meta[code] = ap;
   }
   fs.writeFileSync(path.join(TMP, "meta.json"), JSON.stringify(meta));
+  fs.mkdirSync(DATA, { recursive: true });
+  fs.writeFileSync(path.join(DATA, "meta.json"), JSON.stringify({ ...prev, ...meta }));
   console.log(`Looked up ${Object.keys(meta).length}/${codes.length} airports`);
 }
 
@@ -88,7 +98,7 @@ async function build(codes) {
     const ap = meta[code];
     if (!ap) { failed.push(code); continue; }
     try {
-      const raw = await withRetry(code, () => core.overpass(core.featureQuery(ap), 180000));
+      const raw = await withRetry(code, () => core.overpass(core.featureQuery(ap), 180000), 2);
       const { feats, polys } = core.processOSM(raw.elements || []);
       let places = [], stats = null;
       const ovPath = path.join(TMP, "overture", code + ".json");
