@@ -744,6 +744,8 @@ function externalLinks() {
   return {
     apple: `https://maps.apple.com/?q=${encodeURIComponent(name)}&ll=${c.lat},${c.lon}&z=16`,
     google: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`,
+    // a search rather than a fixed link: airports move these pages around, and the airport's own page is almost always the top result
+    security: `https://www.google.com/search?q=${encodeURIComponent(`${cur.code} ${name} security wait times`)}`,
     googleFood: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("restaurants in " + name)}`,
     yelp: `https://www.yelp.com/search?find_desc=${encodeURIComponent("restaurants")}&find_loc=${encodeURIComponent(cur.city ? name + ", " + cur.city : name)}`,
     site: cur.website,
@@ -923,6 +925,7 @@ function openMenu() {
   if (!cur) return;
   const L2 = externalLinks();
   m.innerHTML = `
+    <a href="${L2.security}" target="_blank" rel="noopener">Security wait times</a>
     <a href="${L2.apple}" target="_blank" rel="noopener">Open in Apple Maps (indoor maps)</a>
     <a href="${L2.google}" target="_blank" rel="noopener">Open in Google Maps</a>
     <a href="${L2.googleFood}" target="_blank" rel="noopener">Restaurants here on Google Maps</a>
