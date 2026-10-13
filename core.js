@@ -151,6 +151,7 @@ BCN|Barcelona–El Prat|Barcelona|Spain|0
 const OVERPASS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter"
 ];
 
@@ -177,9 +178,9 @@ async function overpass(query, timeoutMs = 120000) {
   throw lastErr || new Error("Map server unreachable");
 }
 
-async function lookupAerodrome(code) {
+async function lookupAerodrome(code, run = overpass) {
   const q = `[out:json][timeout:30];nwr["aeroway"="aerodrome"]["iata"="${code}"];out tags bb;`;
-  const j = await overpass(q, 45000);
+  const j = await run(q, 25000);
   const els = (j.elements || []).filter(e => e.tags);
   if (!els.length) return null;
   // prefer the polygon (way/relation) over a bare node
@@ -204,7 +205,7 @@ function bboxStr(b, padM = 0) {
   return [b.minlat - dLat, b.minlon - dLon, b.maxlat + dLat, b.maxlon + dLon].map(n => n.toFixed(5)).join(",");
 }
 
-function featureQuery(ap) {
+function featureQuery(ap, opts = {}) {
   const IN = bboxStr(ap.bounds, 150), OUT = bboxStr(ap.bounds, 1600);
   return `[out:json][timeout:150][maxsize:200000000];
 (
@@ -221,7 +222,7 @@ function featureQuery(ap) {
   nwr["amenity"="parking"]["name"](${OUT});
   nwr["amenity"="parking"]["parking"="multi-storey"](${OUT});
 );
-out geom meta qt;`;
+out geom${opts.meta === false ? "" : " meta"} qt;`;
 }
 
 /* ---------------- Processing raw OSM → app features ---------------- */

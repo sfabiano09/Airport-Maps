@@ -145,7 +145,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .item .dist{font-size:13px;color:var(--ink-2);text-align:right;flex:none;font-variant-numeric:tabular-nums}
 .thin{padding:16px;font-size:14px;color:var(--ink-2)}
 .thin a{color:var(--accent);font-weight:600}
-.loading{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1200;background:var(--surface);box-shadow:var(--shadow);
+.loading{position:absolute;left:50%;top:calc(var(--safe-t) + 190px);transform:translateX(-50%);z-index:1200;background:var(--surface);box-shadow:var(--shadow);
   border-radius:14px;padding:16px 20px;font-weight:600;display:flex;gap:12px;align-items:center;max-width:80vw}
 .spin{width:20px;height:20px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:sp 0.8s linear infinite;flex:none}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -253,7 +253,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 
 <script>
 "use strict";
-const { AIRPORT_DATA, OVERPASS, meters, overpass, lookupAerodrome, featureQuery, processOSM } = AirportCore;
+const { AIRPORT_DATA, OVERPASS, meters, lookupAerodrome, featureQuery, processOSM } = AirportCore;
 /* ============================================================
    Airport list — every US airport Southwest serves (Oct 2026)
    plus the major hubs it doesn't. WN = Southwest.
@@ -316,10 +316,40 @@ const DB = (() => {
 })();
 
 /* ---------------- Overpass ---------------- */
+/* Live map-server query for the phone: ask two servers at once and take whichever answers first,
+   then try the rest. (The weekly GitHub build uses the slower, polite one-at-a-time version.) */
+async function overpassFast(query, timeoutMs = 60000) {
+  const ask = url => {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), timeoutMs);
+    const p = fetch(url, { method: "POST", body: new URLSearchParams({ data: query }), signal: ctl.signal })
+      .then(async r => { clearTimeout(timer); if (!r.ok) throw new Error(r.status === 429 || r.status === 504 ? "map server busy" : "HTTP " + r.status); return r.json(); })
+      .catch(e => { clearTimeout(timer); throw e; });
+    return { p, ctl };
+  };
+  const first = OVERPASS.slice(0, 2).map(ask);
+  try {
+    const j = await Promise.any(first.map(x => x.p));
+    first.forEach(x => x.ctl.abort());
+    return j;
+  } catch {}
+  for (const url of OVERPASS.slice(2)) {
+    try { return await ask(url).p; } catch {}
+  }
+  throw new Error("map servers busy or unreachable");
+}
+async function lookupCached(code) {
+  const hit = lsGet("ap:" + code, null);
+  if (hit && hit.bounds) return hit;
+  const ap = await lookupAerodrome(code, overpassFast);
+  if (ap) lsSet("ap:" + code, ap);
+  return ap;
+}
+
 /* ---------------- Load (cache-first, refresh when online) ----------------
    1) data/CODE.json — built weekly by GitHub Actions from OpenStreetMap + Overture Maps (+ Wikidata website)
    2) live OpenStreetMap query — for any airport not in the bundle                                     */
-async function fetchAirport(code) {
+async function fetchAirport(code, onProgress) {
   const meta = BY_CODE[code];
   let rec = null;
   if (meta) {
@@ -329,9 +359,10 @@ async function fetchAirport(code) {
     } catch {}
   }
   if (!rec) {
-    const ap = await lookupAerodrome(code);
+    const ap = await lookupCached(code);
     if (!ap) { const e = new Error("notfound"); e.notfound = true; throw e; }
-    const raw = await overpass(featureQuery(ap));
+    if (onProgress) onProgress(ap);
+    const raw = await overpassFast(featureQuery(ap, { meta: false }), 90000);
     const { feats, polys } = processOSM(raw.elements || []);
     rec = { osmName: ap.name, website: ap.website, center: ap.center, bounds: ap.bounds, feats, polys,
       generated: new Date().toISOString(), sources: { osm: "live" } };
@@ -681,9 +712,15 @@ async function openAirport(code, opts = {}) {
     $("items").innerHTML = `<div class="thin">You're offline and ${code} isn't saved yet. Open it once with signal (or use "Download all" on the home screen) and it will work offline after that.</div>`;
     return;
   }
-  showLoading(`Loading ${code} terminal map…`);
+  showLoading(`Finding ${code}…`);
+  const slow = setTimeout(() => { if (token === loadToken) $("loadingTxt").textContent = "Map server is slow right now — still loading…"; }, 15000);
   try {
-    rec = await fetchAirport(code);
+    rec = await fetchAirport(code, ap => {
+      if (token !== loadToken) return;
+      // show the street map of the airport right away while gates and places load
+      map.fitBounds([[ap.bounds.minlat, ap.bounds.minlon], [ap.bounds.maxlat, ap.bounds.maxlon]], { paddingTopLeft: [16, 170], paddingBottomRight: [16, 16 + sheetPx()] });
+      $("loadingTxt").textContent = "Loading gates, food and restrooms…";
+    });
     if (token !== loadToken) return;
     cur = rec; renderAll(); fitAirport(); refreshSaved();
   } catch (e) {
@@ -693,7 +730,7 @@ async function openAirport(code, opts = {}) {
       ? `<div class="thin">Couldn't find an airport with code ${code} in the map data. Check the code and try again.</div>`
       : `<div class="thin">Couldn't reach the map server (${esc(e.message || "network error")}). The free map servers get busy at times — <a href="#" id="retry">try again</a>.</div>`;
     const r = $("retry"); if (r) r.onclick = ev => { ev.preventDefault(); openAirport(code, { fromHistory: true }); };
-  } finally { if (token === loadToken) hideLoading(); }
+  } finally { clearTimeout(slow); if (token === loadToken) hideLoading(); }
 }
 async function refreshInBackground(code, token) {
   renderStatus("Updating map data…");
