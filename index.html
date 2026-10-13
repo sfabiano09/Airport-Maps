@@ -21,7 +21,7 @@
   --ink:#1b1d21; --ink-2:#5b5f66; --ink-3:#8a8e95;
   --accent:#d6451b; --accent-ink:#ffffff;
   --map-bg:#e9e6de; --terminal:#f3f0e8; --terminal-line:#b9b2a2; --indoor:#d6d0c2;
-  --c-gate:#1b1d21; --c-food:#d97706; --c-restroom:#2563eb; --c-lounge:#7c3aed; --c-ground:#15803d; --c-landmark:#6b7280;
+  --c-gate:#1b1d21; --c-food:#d97706; --c-restroom:#2563eb; --c-lounge:#7c3aed; --c-ground:#15803d; --c-shop:#db2777; --c-landmark:#6b7280;
   --shadow:0 6px 24px rgba(20,20,20,.12),0 1px 3px rgba(20,20,20,.08);
   --r:14px;
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
@@ -32,7 +32,7 @@
     --ink:#eef0f2; --ink-2:#a9aeb6; --ink-3:#7c818a;
     --accent:#ff6a3d; --accent-ink:#16181c;
     --map-bg:#1d2024; --terminal:#565d68; --terminal-line:#8a93a0; --indoor:#5f6772;
-    --c-gate:#eef0f2; --c-food:#f59e0b; --c-restroom:#60a5fa; --c-lounge:#a78bfa; --c-ground:#4ade80; --c-landmark:#9ca3af;
+    --c-gate:#eef0f2; --c-food:#f59e0b; --c-restroom:#60a5fa; --c-lounge:#a78bfa; --c-ground:#4ade80; --c-shop:#f472b6; --c-landmark:#9ca3af;
     --shadow:0 6px 24px rgba(0,0,0,.45),0 1px 3px rgba(0,0,0,.4);
   }
 }
@@ -41,7 +41,7 @@
   --ink:#eef0f2; --ink-2:#a9aeb6; --ink-3:#7c818a;
   --accent:#ff6a3d; --accent-ink:#16181c;
   --map-bg:#1d2024; --terminal:#565d68; --terminal-line:#8a93a0; --indoor:#5f6772;
-  --c-gate:#eef0f2; --c-food:#f59e0b; --c-restroom:#60a5fa; --c-lounge:#a78bfa; --c-ground:#4ade80; --c-landmark:#9ca3af;
+  --c-gate:#eef0f2; --c-food:#f59e0b; --c-restroom:#60a5fa; --c-lounge:#a78bfa; --c-ground:#4ade80; --c-shop:#f472b6; --c-landmark:#9ca3af;
   --shadow:0 6px 24px rgba(0,0,0,.45),0 1px 3px rgba(0,0,0,.4);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -286,7 +286,7 @@ const ALIASES = { indy: ["IND"], vegas: ["LAS"], nyc: ["LGA", "JFK", "EWR", "ISP
   "twin cities": ["MSP"], "st paul": ["MSP"], "fort worth": ["DFW"], "south padre": ["HRL"], steamboat: ["HDN"], tahoe: ["RNO"],
   cincy: ["CVG"], disney: ["MCO"], vail: ["HDN"], "dallas": ["DFW"], "houston": ["IAH"], "chicago": ["ORD"] };
 
-const DATA_VERSION = 4;           // bump when the query/processing changes
+const DATA_VERSION = 5;           // bump when the query/processing changes
 const STALE_DAYS = 45;            // refresh saved data after this when online
 /* ---------------- tiny helpers ---------------- */
 const $ = id => document.getElementById(id);
@@ -482,6 +482,7 @@ async function bulkDownload() {
 const CATS = [
   { k: "all", label: "All", color: null },
   { k: "food", label: "Food", color: "--c-food" },
+  { k: "shop", label: "Shops", color: "--c-shop" },
   { k: "restroom", label: "Restrooms", color: "--c-restroom" },
   { k: "lounge", label: "Lounges", color: "--c-lounge" },
   { k: "ground", label: "Ground", color: "--c-ground" },
@@ -492,7 +493,7 @@ let cur = null;             // current airport record
 let tab = lsGet("tab2", "all");
 let me = null;              // live location {lat, lon, acc} while tracking
 let meWatch = null, meCircle = null, meFollow = false;
-const PLACE_CATS = new Set(["food", "restroom", "lounge", "ground"]);
+const PLACE_CATS = new Set(["food", "shop", "restroom", "lounge", "ground"]);
 const inTab = f => tab === "all" ? PLACE_CATS.has(f.c) : f.c === tab;
 let level = "all";
 let selGate = null;         // selected gate feature
@@ -606,7 +607,7 @@ function renderLevels() {
 function renderTabs() {
   const counts = {};
   cur.feats.forEach(f => { if (onLevel(f)) { counts[f.c] = (counts[f.c] || 0) + 1; if (PLACE_CATS.has(f.c)) counts.all = (counts.all || 0) + 1; } });
-  const allDot = "conic-gradient(var(--c-food) 0 25%, var(--c-restroom) 0 50%, var(--c-lounge) 0 75%, var(--c-ground) 0)";
+  const allDot = "conic-gradient(var(--c-food) 0 20%, var(--c-shop) 0 40%, var(--c-restroom) 0 60%, var(--c-lounge) 0 80%, var(--c-ground) 0)";
   $("tabs").innerHTML = CATS.map(c => `<button class="tab${tab === c.k ? " on" : ""}" data-tab="${c.k}">
     <i style="background:${c.color ? `var(${c.color})` : allDot}"></i>${c.label}<small>${counts[c.k] || 0}</small></button>`).join("");
 }
@@ -753,7 +754,7 @@ function externalLinks() {
 }
 function thinNote(k, partial) {
   const L2 = externalLinks();
-  const what = { all: "places", food: "food", restroom: "restrooms", lounge: "lounges", ground: "ground transport", gate: "gates" }[k];
+  const what = { all: "places", food: "food", shop: "shops", restroom: "restrooms", lounge: "lounges", ground: "ground transport", gate: "gates" }[k];
   const lead = partial ? `Only a few ${what} are mapped here, so the list may be incomplete.` : `No ${what} are mapped at this airport${level !== "all" ? " on this level" : ""}.`;
   return `<div class="thin">${lead} Try <a href="${L2.apple}" target="_blank" rel="noopener">Apple Maps</a>, which has indoor maps for many big airports${L2.site ? `, or the <a href="${esc(L2.site)}" target="_blank" rel="noopener">airport's website</a>` : ""}.</div>`;
 }

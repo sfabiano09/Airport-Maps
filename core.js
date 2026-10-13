@@ -225,7 +225,8 @@ function featureQuery(ap, opts = {}) {
   nwr["aeroway"~"^(gate|terminal)$"](${IN});
   nwr["building"="terminal"](${IN});
   nwr["amenity"~"^(restaurant|cafe|fast_food|bar|pub|food_court|ice_cream|toilets|lounge)$"](${IN});
-  nwr["shop"~"^(coffee|bakery|deli)$"](${IN});
+  nwr["shop"](${IN});
+  nwr["amenity"~"^(pharmacy|bureau_de_change)$"](${IN});
   nwr["lounge"](${IN});
   nwr["name"~"lounge|club|centurion|sapphire|polaris|security|checkpoint|tsa|baggage|bag claim|rideshare|ride share|ride app|uber|lyft|ticketing",i](${IN});
   way["indoor"~"^(area|corridor)$"](${IN});
@@ -266,6 +267,10 @@ function categorize(t) {
     const base = FOOD_LABEL[t.amenity] || (t.shop === "coffee" ? "Coffee" : t.shop === "bakery" ? "Bakery" : "Food");
     return ["food", cuisine ? `${base} · ${cuisine[0].toUpperCase()}${cuisine.slice(1)}` : base];
   }
+  if (t.shop || t.amenity === "pharmacy" || t.amenity === "bureau_de_change") {
+    if (t.shop === "vacant" || t.disused) return null;
+    return ["shop", shopLabel(t)];
+  }
   if (t.amenity === "car_rental") return ["ground", "Rental car"];
   if (RIDE_RE.test(name)) return ["ground", "Rideshare pickup"];
   if (t.amenity === "taxi") return ["ground", "Taxi stand"];
@@ -279,6 +284,25 @@ function categorize(t) {
   if (/baggage|bag claim/i.test(name)) return ["landmark", "Baggage claim"];
   if (/ticketing/i.test(name)) return ["landmark", "Ticketing"];
   return null;
+}
+
+const SHOP_LABEL = {
+  convenience: "News & convenience", newsagent: "News & convenience", kiosk: "News & convenience", books: "Books",
+  duty_free: "Duty free", clothes: "Clothing", boutique: "Clothing", fashion: "Clothing", shoes: "Shoes",
+  electronics: "Electronics", mobile_phone: "Electronics", computer: "Electronics", hifi: "Electronics",
+  gift: "Gifts & souvenirs", souvenir: "Gifts & souvenirs", jewelry: "Jewelry", watches: "Watches",
+  cosmetics: "Beauty", perfumery: "Beauty", beauty: "Spa & beauty", massage: "Spa & beauty", chemist: "Pharmacy",
+  confectionery: "Candy & snacks", chocolate: "Candy & snacks", bag: "Bags & travel", leather: "Bags & travel",
+  travel_agency: "Travel services", toys: "Toys", sports: "Sports", alcohol: "Wine & spirits", wine: "Wine & spirits",
+  tobacco: "Tobacco", e_cigarette: "Tobacco", optician: "Eyewear", hairdresser: "Barber & salon", florist: "Flowers",
+  department_store: "Department store", variety_store: "Variety store", outdoor: "Outdoor", art: "Art", music: "Music",
+};
+function shopLabel(t) {
+  if (t.amenity === "pharmacy") return "Pharmacy";
+  if (t.amenity === "bureau_de_change") return "Currency exchange";
+  if (t.duty_free === "yes" || /duty ?free/i.test(t.name || "")) return "Duty free";
+  const v = String(t.shop || "").split(";")[0];
+  return SHOP_LABEL[v] || (v && v !== "yes" ? v.replace(/_/g, " ").replace(/^./, c => c.toUpperCase()) : "Shop");
 }
 
 function centerOf(e) {
@@ -426,6 +450,15 @@ function categorizeOverture(cat, name) {
   if (/bakery|donut|bagel|dessert|ice_cream|frozen_yogurt/.test(c)) return ["food", "Quick bite"];
   if (/fast_food|burger|sandwich|pizza|deli|hot_dog|food_court|food_stand|chicken_wings|taco|mexican_restaurant/.test(c)) return ["food", /food_court/.test(c) ? "Food court" : "Quick bite"];
   if (/(^|_)(bar|pub|brewery|wine_bar|sports_bar|beer|cocktail)(_|$)|brewpub|gastropub/.test(c)) return ["food", "Bar"];
+  if (/duty_free/.test(c) || /duty ?free/i.test(n)) return ["shop", "Duty free"];
+  if (/pharmacy|drugstore|chemist/.test(c)) return ["shop", "Pharmacy"];
+  if (/currency_exchange/.test(c)) return ["shop", "Currency exchange"];
+  if (/newsstand|news_stand|convenience|bookstore|book_store/.test(c)) return ["shop", /book/.test(c) ? "Books" : "News & convenience"];
+  if (!/(barber|repair|tattoo|body_shop|auto|car_|tire|dentist|doctor|clinic)/.test(c) &&
+      /(store|shop|boutique|retail|gift|souvenir|jewel|cosmetic|beauty_product|perfume|electronics|clothing|apparel|accessor|candy|chocolate|luggage|sunglasses|eyewear|toy|tobacco|liquor|fashion|shoe)/.test(c)) {
+    const label = c.replace(/_(store|shop)$/, "").replace(/_/g, " ");
+    return ["shop", label ? label[0].toUpperCase() + label.slice(1) : "Shop"];
+  }
   if (/restaurant|steakhouse|grill|diner|bistro|eatery|sushi|seafood|barbecue|bbq/.test(c)) {
     const cuisine = c.replace(/_restaurant$/, "").replace(/^restaurant$/, "").replace(/_/g, " ");
     return ["food", cuisine ? `Restaurant · ${cuisine[0].toUpperCase()}${cuisine.slice(1)}` : "Restaurant"];
