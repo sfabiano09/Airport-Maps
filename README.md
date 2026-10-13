@@ -13,6 +13,7 @@ A GitHub Action (`.github/workflows/build-data.yml`) runs every Monday and rebui
 | [OpenStreetMap](https://www.openstreetmap.org/copyright) (ODbL) | Terminal outlines, gates, floor levels, restrooms, food, lounges, ground transport |
 | [Overture Maps](https://overturemaps.org) places (CDLA-Permissive / ODbL) | Extra restaurants, cafés, lounges and rental cars from business listings; confirms or flags OSM places |
 | [Wikidata](https://www.wikidata.org) (CC0) | Each airport's official website |
+| [LAX Terminal Concession Locations](https://catalog.data.gov/dataset/los-angeles-international-airport-terminal-concession-locations), City of Los Angeles open data (CC BY 4.0) | LAX only: official restaurant/shop locations; moves "approximate" places to their official spot (`scripts/official.js`) |
 
 Merge rules (`core.js` → `mergeOverture`): OpenStreetMap is the base. An Overture place with a similar name, same type, within 150 m confirms the OSM place ("confirmed by 2 sources"). Unmatched Overture places are added only with confidence ≥ 0.6, near the terminals, and are labeled *location approximate* (dashed marker). Places Overture lists as closed are flagged *may have closed*. If an airport fails to build one week, its previous file is kept.
 

@@ -618,13 +618,16 @@ const subLabel = f => {
 function srcNote(f) {
   const when = f.u ? ` · updated ${f.u.slice(0, 7)}` : "";
   if (f.cl) return "May have closed (business listing says closed)" + when;
-  if (f.src === "ovt") return "Location approximate — from business listings, not the terminal map" + when;
-  if (f.src === "osm+ovt") return "Confirmed by OpenStreetMap + business listings" + when;
+  const src = f.src || "";
+  if (/\boff\b/.test(src)) return `From ${cur.sources && cur.sources.official ? cur.sources.official.replace(/ \(.*$/, "") : "the airport's official listing"}` + (src !== "off" ? " + OpenStreetMap / business listings" : "") + when;
+  if (src === "ovt") return "Location approximate — from business listings, not the terminal map" + when;
+  if (src === "osm+ovt") return "Confirmed by OpenStreetMap + business listings" + when;
   return f.u ? `OpenStreetMap${when}` : "";
 }
 function popupHtml(f) {
   const bits = [`<b>${esc(f.c === "gate" ? "Gate " + f.n : (f.n || f.s))}</b>`];
   if (f.c !== "gate" && f.n) bits.push(`<div class="s">${esc(subLabel(f))}</div>`);
+  if (f.where) bits.push(`<div class="s">${esc(f.where)}</div>`);
   if (f.lv) bits.push(`<div class="s">Level ${esc(f.lv)}</div>`);
   if (f.h) bits.push(`<div class="s">Hours: ${esc(f.h)}</div>`);
   const src = srcNote(f);
@@ -805,7 +808,7 @@ function renderList() {
 
   let html = items.map(f => {
     const title = f.c === "gate" ? "Gate " + f.n : (f.n || f.s);
-    const sub = [f.c === "gate" ? "" : (f.n ? subLabel(f) : ""), f.lv ? "Level " + f.lv : "", f.h ? f.h : "",
+    const sub = [f.c === "gate" ? "" : (f.n ? subLabel(f) : ""), f.where || "", f.lv ? "Level " + f.lv : "", f.h ? f.h : "",
       f.ap ? "location approximate" : "", f.cl ? "may have closed" : ""].filter(Boolean).join(" · ");
     const dist = from && f.c !== "gate" ? (f._w.routed ? `<span class="dist"><b>${mins(f._w)} min</b></span>`
       : `<span class="dist">~${mins(f._w)} min<br><small>est.</small></span>`) : "";

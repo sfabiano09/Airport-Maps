@@ -525,6 +525,39 @@ function mergeOverture(feats, polys, places) {
   }
   return { feats: out, stats };
 }
+/* Merge an airport's own official listing (e.g. LAX's open-data concessions list).
+   places: [{name, cat: "food"|"shop"|"lounge"|"ground", sub, lat?, lon?, where, u}]
+   - With coordinates: the official spot wins. A matching place that was only "approximate" moves to the
+     official location and stops being approximate; unmatched places are added at their official spot.
+   - Without coordinates: only enriches a single unambiguous match (adds "where", e.g. "Terminal B · Great Hall").
+   Every touched place gets "off" in its source list. */
+function mergeOfficial(feats, places) {
+  const out = feats.slice(), stats = { official: places.length, confirmed: 0, moved: 0, added: 0, enriched: 0 };
+  for (const p of places) {
+    if (!p.name || !p.cat) continue;
+    const cands = out.filter(f => f.c === p.cat && f.n && sameName(f.n, p.name));
+    const hasXY = isFinite(p.lat) && isFinite(p.lon);
+    let best = null;
+    if (hasXY) {
+      let bd = 300;
+      for (const f of cands) { const d = meters(f, p); if (d < bd) { bd = d; best = f; } }
+    } else if (cands.length === 1) best = cands[0];
+    if (best) {
+      if (hasXY && best.ap) { best.lat = +(+p.lat).toFixed(6); best.lon = +(+p.lon).toFixed(6); delete best.ap; stats.moved++; }
+      else if (hasXY) stats.confirmed++; else stats.enriched++;
+      if (!/\boff\b/.test(best.src || "")) best.src = (best.src ? best.src + "+" : "") + "off";
+      if (p.where) best.where = p.where;
+      if (p.u && (!best.u || p.u > best.u)) best.u = p.u;
+      continue;
+    }
+    if (!hasXY) continue;
+    out.push({ id: "x" + String(p.id || p.name).replace(/\W+/g, "").slice(-14), c: p.cat, s: p.sub || "", n: p.name,
+      lat: +(+p.lat).toFixed(6), lon: +(+p.lon).toFixed(6), lv: "", src: "off", where: p.where || "", u: p.u || undefined });
+    stats.added++;
+  }
+  return { feats: out, stats };
+}
+
 function anchorPoints(feats, polys) {
   const anchors = [];
   feats.forEach(f => { if (f.c === "gate") anchors.push(f); });
@@ -557,6 +590,6 @@ const AIRPORTS = AIRPORT_DATA.trim().split("\n").map(l => {
   return { code, name, city, st, wn: wn === "1" };
 });
 
-return { buildGraph, WALK_MPS, lookupAerodromes, loungeProgram, AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
+return { mergeOfficial, buildGraph, WALK_MPS, lookupAerodromes, loungeProgram, AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
   categorize, processOSM, categorizeOverture, sameName, mergeOverture, anchorPoints, MIN_CONF };
 });

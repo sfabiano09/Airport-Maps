@@ -10,6 +10,7 @@
 const fs = require("fs");
 const path = require("path");
 const core = require("../core.js");
+const OFFICIAL = require("./official.js");
 
 const ROOT = path.join(__dirname, "..");
 const TMP = path.join(ROOT, "tmp");
@@ -109,13 +110,23 @@ async function build(codes) {
       const ovPath = path.join(TMP, "overture", code + ".json");
       if (fs.existsSync(ovPath)) places = JSON.parse(fs.readFileSync(ovPath, "utf8"));
       const merged = core.mergeOverture(feats, polys, places);
+      // the airport's own open data, where it publishes some (see scripts/official.js)
+      let official = null;
+      if (OFFICIAL[code]) {
+        try {
+          const o = await OFFICIAL[code]();
+          const m = core.mergeOfficial(merged.feats, o.places);
+          merged.feats = m.feats; official = { label: o.label, ...m.stats };
+          console.log(`  ${code} official listing: ${JSON.stringify(m.stats)}`);
+        } catch (e) { console.log(`  ${code} official listing unavailable: ${e.message}`); }
+      }
       stats = merged.stats;
       const counts = {};
       merged.feats.forEach(f => { counts[f.c] = (counts[f.c] || 0) + 1; });
       const rec = {
         code, osmName: ap.name, website: ap.website, websiteSource: ap.websiteSource,
         center: ap.center, bounds: ap.bounds, generated: now,
-        sources: { osm: now.slice(0, 10), overture: fs.existsSync(ovPath) ? release : null },
+        sources: { osm: now.slice(0, 10), overture: fs.existsSync(ovPath) ? release : null, official: official ? official.label : null },
         stats, counts, feats: merged.feats, polys, g: graph,
       };
       fs.writeFileSync(path.join(DATA, code + ".json"), JSON.stringify(rec));
