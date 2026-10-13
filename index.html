@@ -143,6 +143,8 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .item .main{flex:1;min-width:0}
 .item .t1{font-weight:580;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item .t2{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .dist small{font-size:11px;color:var(--ink-3)}
+.item .dist b{color:var(--ink);font-weight:650}
 .item .dist{font-size:13px;color:var(--ink-2);text-align:right;flex:none;font-variant-numeric:tabular-nums}
 .thin{padding:16px;font-size:14px;color:var(--ink-2)}
 .thin a{color:var(--accent);font-weight:600}
@@ -260,7 +262,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 
 <script>
 "use strict";
-const { loungeProgram, AIRPORT_DATA, OVERPASS, meters, lookupAerodrome, featureQuery, processOSM } = AirportCore;
+const { buildGraph, WALK_MPS, loungeProgram, AIRPORT_DATA, OVERPASS, meters, lookupAerodrome, featureQuery, processOSM } = AirportCore;
 /* ============================================================
    Airport list — every US airport Southwest serves (Oct 2026)
    plus the major hubs it doesn't. WN = Southwest.
@@ -281,7 +283,7 @@ const ALIASES = { indy: ["IND"], vegas: ["LAS"], nyc: ["LGA", "JFK", "EWR", "ISP
   "twin cities": ["MSP"], "st paul": ["MSP"], "fort worth": ["DFW"], "south padre": ["HRL"], steamboat: ["HDN"], tahoe: ["RNO"],
   cincy: ["CVG"], disney: ["MCO"], vail: ["HDN"], "dallas": ["DFW"], "houston": ["IAH"], "chicago": ["ORD"] };
 
-const DATA_VERSION = 3;           // bump when the query/processing changes
+const DATA_VERSION = 4;           // bump when the query/processing changes
 const STALE_DAYS = 45;            // refresh saved data after this when online
 /* ---------------- tiny helpers ---------------- */
 const $ = id => document.getElementById(id);
@@ -371,7 +373,7 @@ async function fetchAirport(code, onProgress) {
     if (onProgress) onProgress(ap);
     const raw = await overpassFast(featureQuery(ap, { meta: false }), 90000);
     const { feats, polys } = processOSM(raw.elements || []);
-    rec = { osmName: ap.name, website: ap.website, center: ap.center, bounds: ap.bounds, feats, polys,
+    rec = { osmName: ap.name, website: ap.website, center: ap.center, bounds: ap.bounds, feats, polys, g: buildGraph(raw.elements || []),
       generated: new Date().toISOString(), sources: { osm: "live" } };
   }
   Object.assign(rec, {
@@ -534,8 +536,13 @@ function popupHtml(f) {
   const src = srcNote(f);
   if (src) bits.push(`<div class="s">${esc(src)}</div>`);
   if (f.web) bits.push(`<div class="s"><a href="${esc(f.web)}" target="_blank" rel="noopener">Website</a></div>`);
-  if (selGate && f !== selGate) { const m = meters(selGate, f); bits.push(`<div class="s">~${walkMin(m)} min walk from gate ${esc(selGate.n)} (${Math.round(m)} m straight line)</div>`); }
-  if (me) { const m = meters(me, f); bits.push(`<div class="s">~${walkMin(m)} min walk from you (${Math.round(m)} m straight line)</div>`); }
+  const from = origin();
+  if (from && f !== selGate) {
+    const w = walkInfo(f), who = selGate ? `gate ${esc(selGate.n)}` : "you";
+    bits.push(w.routed
+      ? `<div class="s"><b>${mins(w)} min walk</b> from ${who} · route shown on map</div>`
+      : `<div class="s">~${mins(w)} min from ${who} — straight-line estimate (no mapped walkway route)</div>`);
+  }
   return bits.join("");
 }
 
@@ -563,7 +570,9 @@ function drawAirport() {
       m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<div class="pw"><div class="pm${f.ap ? " ap" : ""}" style="${f.ap ? "border-color:" + col : "background:" + col}"></div>${f.n || f.c === "restroom" ? `<span class="pl">${esc(f.c === "lounge" ? f.n : (f.n || f.s))}</span>` : ""}</div>`, iconSize: [0, 0] }), zIndexOffset: f.c === tab ? 300 : 0 });
       m.addTo(layers.pois);
     }
-    m.bindPopup(() => popupHtml(f), { offset: [0, -4], autoPanPaddingTopLeft: [10, 170], autoPanPaddingBottomRight: [10, 20] });
+    m.bindPopup(() => popupHtml(f), { maxWidth: 240, offset: [0, -4], autoPanPaddingTopLeft: [10, 170], autoPanPaddingBottomRight: [10, 20] });
+    m.on("popupopen", () => drawRoute(f));
+    m.on("popupclose", clearRoute);
     markerById[f.id] = m;
   }
   Object.values(layers).forEach(l => l.addTo(map));
@@ -598,18 +607,112 @@ function renderTabs() {
     <i style="background:${c.color ? `var(${c.color})` : allDot}"></i>${c.label}<small>${counts[c.k] || 0}</small></button>`).join("");
 }
 
+/* ---------------- Walking routes ----------------
+   Times follow the airport's mapped walkways (corridors, stairs, escalators, moving walkways, elevators).
+   Where an airport has no walkway map, or a place can't be reached on it, we fall back to a straight-line
+   estimate and label it "est." so the two are never confused. */
+let G = null, G_for = null;   // decoded walking graph for the current airport
+let route = null;             // shortest-path tree from the current origin (gate or you)
+let routeLine = null;
+function decodeGraph(g) {
+  if (!g || !g.n || g.n.length < 4) return null;
+  const N = g.n.length / 2, lat = new Float64Array(N), lon = new Float64Array(N);
+  for (let i = 0; i < N; i++) { lat[i] = g.c[0] + g.n[2 * i] / 1e6; lon[i] = g.c[1] + g.n[2 * i + 1] / 1e6; }
+  const one = new Set(g.o || []), M = g.e.length / 3, deg = new Int32Array(N + 1);
+  for (let k = 0; k < M; k++) { deg[g.e[3 * k]]++; if (!one.has(k)) deg[g.e[3 * k + 1]]++; }
+  const start = new Int32Array(N + 1);
+  for (let i = 0; i < N; i++) start[i + 1] = start[i] + deg[i];
+  const fill = start.slice(0, N), to = new Int32Array(start[N]), w = new Float64Array(start[N]);
+  for (let k = 0; k < M; k++) {
+    const a = g.e[3 * k], b = g.e[3 * k + 1], c = g.e[3 * k + 2];
+    to[fill[a]] = b; w[fill[a]++] = c;
+    if (!one.has(k)) { to[fill[b]] = a; w[fill[b]++] = c; }
+  }
+  const grid = new Map(), cell = (la, lo) => `${Math.floor(la / 0.0005)},${Math.floor(lo / 0.0006)}`;
+  for (let i = 0; i < N; i++) { const k = cell(lat[i], lon[i]); (grid.get(k) || grid.set(k, []).get(k)).push(i); }
+  return { N, lat, lon, start, to, w, grid, cell };
+}
+function nearestNode(p, maxM) {
+  if (!G) return null;
+  const cy = Math.floor(p.lat / 0.0005), cx = Math.floor(p.lon / 0.0006);
+  let best = -1, bd = maxM;
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    const list = G.grid.get(`${cy + dy},${cx + dx}`); if (!list) continue;
+    for (const i of list) { const d = meters(p, { lat: G.lat[i], lon: G.lon[i] }); if (d < bd) { bd = d; best = i; } }
+  }
+  return best < 0 ? null : { i: best, d: bd };
+}
+function dijkstra(src) {
+  const dist = new Float64Array(G.N).fill(Infinity), prev = new Int32Array(G.N).fill(-1);
+  const hn = [], hd = [];   // binary heap of (node, dist)
+  const push = (n, d) => { let i = hn.length; hn.push(n); hd.push(d);
+    while (i > 0) { const p = (i - 1) >> 1; if (hd[p] <= hd[i]) break; [hn[p], hn[i]] = [hn[i], hn[p]]; [hd[p], hd[i]] = [hd[i], hd[p]]; i = p; } };
+  const pop = () => { const n = hn[0], d = hd[0], ln = hn.pop(), ld = hd.pop();
+    if (hn.length) { hn[0] = ln; hd[0] = ld; let i = 0;
+      for (;;) { const l = 2 * i + 1, r = l + 1; let m = i;
+        if (l < hn.length && hd[l] < hd[m]) m = l; if (r < hn.length && hd[r] < hd[m]) m = r;
+        if (m === i) break; [hn[m], hn[i]] = [hn[i], hn[m]]; [hd[m], hd[i]] = [hd[i], hd[m]]; i = m; } }
+    return [n, d]; };
+  dist[src] = 0; push(src, 0);
+  while (hn.length) {
+    const [u, d] = pop(); if (d > dist[u]) continue;
+    for (let k = G.start[u]; k < G.start[u + 1]; k++) {
+      const v = G.to[k], nd = d + G.w[k];
+      if (nd < dist[v]) { dist[v] = nd; prev[v] = u; push(v, nd); }
+    }
+  }
+  return { dist, prev };
+}
+function origin() { return selGate || me; }
+function computeRoutes() {
+  if (G_for !== cur) { G = decodeGraph(cur.g); G_for = cur; route = null; }
+  const from = origin();
+  if (!G || !from) { route = null; return; }
+  const key = selGate ? "g" + selGate.id : "me";
+  if (route && route.key === key && (selGate || meters(route.src, from) < 12)) return;
+  const s = nearestNode(from, 80);
+  route = s ? { key, src: { lat: from.lat, lon: from.lon }, s, ...dijkstra(s.i) } : { key, src: { lat: from.lat, lon: from.lon }, none: true };
+}
+function walkInfo(f) {
+  const from = origin(); if (!from) return null;
+  computeRoutes();
+  if (route && !route.none) {
+    const t = nearestNode(f, 60);
+    if (t && isFinite(route.dist[t.i])) return { sec: route.dist[t.i] / 10 + (route.s.d + t.d) / WALK_MPS, routed: true, node: t.i };
+  }
+  const m = meters(from, f);
+  return { sec: (m * 1.35) / 1.25, routed: false, m };
+}
+const mins = w => Math.max(1, Math.round(w.sec / 60));
+function clearRoute() { if (routeLine) { map.removeLayer(routeLine); routeLine = null; } }
+function drawRoute(f) {
+  clearRoute();
+  const w = walkInfo(f); if (!w || !w.routed) return;
+  const pts = [[f.lat, f.lon]];
+  for (let i = w.node; i >= 0; i = route.prev[i]) pts.push([G.lat[i], G.lon[i]]);
+  pts.push([route.src.lat, route.src.lon]);
+  routeLine = L.polyline(pts, { color: cssVar("--accent"), weight: 5, opacity: .85, lineCap: "round", lineJoin: "round", interactive: false }).addTo(map);
+  // show the whole walk (from the gate/you to the place) if it doesn't fit on screen
+  const b = routeLine.getBounds();
+  const popH = (document.querySelector(".leaflet-popup") || {}).offsetHeight || 180;
+  const pad = { paddingTopLeft: [24, 170 + popH], paddingBottomRight: [24, 24 + sheetPx()] };
+  const view = map.getBounds().pad(-0.15);
+  if (!view.contains(b)) setTimeout(() => map.fitBounds(b, { ...pad, maxZoom: 18.5, animate: true }), 50);
+}
+
 function renderList() {
   const items = cur.feats.filter(f => inTab(f) && onLevel(f));
-  const from = selGate || me;
+  const from = origin();
   if (tab === "gate") items.sort((a, b) => natural(a.n, b.n));
-  else if (from) items.forEach(f => f._d = meters(from, f)), items.sort((a, b) => a._d - b._d);
+  else if (from) items.forEach(f => f._w = walkInfo(f)), items.sort((a, b) => a._w.sec - b._w.sec);
   else items.sort((a, b) => natural(a.n || a.s, b.n || b.s));
 
   let html = items.map(f => {
     const title = f.c === "gate" ? "Gate " + f.n : (f.n || f.s);
     const sub = [f.c === "gate" ? "" : (f.n ? subLabel(f) : ""), f.lv ? "Level " + f.lv : "", f.h ? f.h : "",
       f.ap ? "location approximate" : "", f.cl ? "may have closed" : ""].filter(Boolean).join(" · ");
-    const dist = from && f.c !== "gate" ? `<span class="dist">~${walkMin(f._d)} min</span>` : "";
+    const dist = from && f.c !== "gate" ? (f._w.routed ? `<span class="dist"><b>${mins(f._w)} min</b></span>`
+      : `<span class="dist">~${mins(f._w)} min<br><small>est.</small></span>`) : "";
     const col = CATS.find(c => c.k === f.c).color;
     return `<button class="item" data-id="${esc(f.id)}"><span class="dot" style="background:var(${col})"></span>
       <span class="main"><div class="t1">${esc(title)}</div>${sub ? `<div class="t2">${esc(sub)}</div>` : ""}</span>${dist}</button>`;
@@ -642,8 +745,13 @@ function renderStatus(extra) {
   const when = age < 1 ? "today" : age === 1 ? "yesterday" : `${age} days ago`;
   const srcs = cur.sources && cur.sources.overture ? "OpenStreetMap + Overture" : "OpenStreetMap";
   let s = `Saved for offline · ${srcs} · built ${when}`;
-  if (selGate) s = `Sorted by walking time from gate ${selGate.n} · straight-line estimate`;
-  else if (me) s = `Sorted by walking time from you · location accurate to ~${Math.round(me.acc)} m`;
+  if (origin()) {
+    computeRoutes();
+    const who = selGate ? `gate ${selGate.n}` : `you (±${Math.round(me.acc)} m)`;
+    s = G && route && !route.none ? `Walking times along mapped walkways from ${who} · tap a place for the route`
+      : G ? `Walking times from ${who} · ${selGate ? "gate" : "you"} not on the walkway map, so these are estimates`
+      : `Walking times from ${who} · estimates (no walkway map at this airport)`;
+  }
   if (extra) s = extra;
   el.textContent = s;
   el.classList.toggle("warn", !!extra && /offline|couldn|busy/i.test(extra));
@@ -687,6 +795,7 @@ function showSuggestions() {
     : `<div class="thin">No gate "${esc(q.toUpperCase())}" in the map data. ${cur.feats.some(f => f.c === "gate") ? "Check the Gates tab for what's mapped." : "This airport's gates aren't mapped yet."}</div>`;
 }
 function selectGate(g) {
+  clearRoute();
   selGate = g;
   lsSet("gate:" + cur.code, g ? g.id : null);
   $("gq").value = g ? g.n : "";
@@ -723,6 +832,13 @@ async function openAirport(code, opts = {}) {
   if (rec && rec.v === DATA_VERSION) {
     cur = rec; renderAll(); fitAirport(); restoreGate();
     if (isStale(rec) && navigator.onLine) refreshInBackground(code, token);
+    else if (rec.bundled && navigator.onLine) {
+      // a newer weekly build? (index.json is small)
+      fetch("data/index.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).then(ix => {
+        const g = ix && ix.airports && ix.airports[code] && ix.airports[code].generated;
+        if (g && g > (rec.generated || "") && token === loadToken) refreshInBackground(code, token);
+      }).catch(() => {});
+    }
     else if (!navigator.onLine) renderStatus("Offline · showing your saved copy");
     return;
   }
@@ -830,6 +946,7 @@ function stopLocating() {
   meWatch = null; me = null;
   if (meMarker) { map.removeLayer(meMarker); meMarker = null; }
   if (meCircle) { map.removeLayer(meCircle); meCircle = null; }
+  clearRoute();
   $("locate").classList.remove("on");
   if (cur) { renderList(); renderStatus(); }
 }

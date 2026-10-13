@@ -229,6 +229,7 @@ function featureQuery(ap, opts = {}) {
   nwr["lounge"](${IN});
   nwr["name"~"lounge|club|centurion|sapphire|polaris|security|checkpoint|tsa|baggage|bag claim|rideshare|ride share|ride app|uber|lyft|ticketing",i](${IN});
   way["indoor"~"^(area|corridor)$"](${IN});
+  way["highway"~"^(footway|corridor|steps|pedestrian|path|elevator)$"](${IN});
   nwr["amenity"~"^(car_rental|taxi|bus_station)$"](${OUT});
   nwr["railway"~"^(station|halt)$"](${OUT});
   nwr["public_transport"="station"](${OUT});
@@ -302,6 +303,7 @@ function processOSM(elements) {
   const feats = [], polys = [];
   for (const e of elements) {
     const t = e.tags || {};
+    if (WALK_HW.has(t.highway)) continue;          // walkways → walking graph, not drawn
     const isTerminal = t.aeroway === "terminal" || t.building === "terminal";
     if (isTerminal && (e.geometry || e.members)) {
       const rings = e.type === "relation"
@@ -354,6 +356,59 @@ function processOSM(elements) {
   return { feats: final, polys };
 }
 
+
+/* ---------------- Walking graph (for real walking routes) ----------------
+   Built from OpenStreetMap walkways inside the airport: concourse corridors, footways, stairs,
+   escalators/moving walkways (conveying=*), elevators. Compact form:
+   { c:[lat,lon] origin, n:[dlat,dlon,…] in 1e-6°, e:[a,b,secondsX10,…], o:[edge index,…] one-way edges }  */
+const WALK_HW = new Set(["footway", "corridor", "steps", "pedestrian", "path", "elevator"]);
+const WALK_MPS = 1.25;
+function buildGraph(elements, minComponent = 20) {
+  const ids = new Map(), pts = [], edges = [], oneway = [];
+  const idx = (id, p) => { let i = ids.get(id); if (i === undefined) { i = pts.length; ids.set(id, i); pts.push(p); } return i; };
+  for (const e of elements) {
+    if (e.type !== "way" || !e.nodes || !e.geometry || e.nodes.length !== e.geometry.length) continue;
+    const t = e.tags || {};
+    if (!WALK_HW.has(t.highway)) continue;
+    if (t.area === "yes" || /^(no|private)$/.test(t.access || "") || t.foot === "no") continue;
+    let factor = 1;
+    if (t.highway === "steps") factor = /^(yes|forward|backward|reversible)$/.test(t.conveying || "") ? 0.7 : 1.6;  // escalator vs stairs
+    else if (t.conveying && t.conveying !== "no") factor = 0.6;                       // moving walkway
+    const dir = t.conveying === "forward" || t.oneway === "yes" ? 1 : t.conveying === "backward" || t.oneway === "-1" ? -1 : 0;
+    for (let i = 0; i + 1 < e.nodes.length; i++) {
+      const g0 = e.geometry[i], g1 = e.geometry[i + 1];
+      if (!g0 || !g1) continue;
+      let a = idx(e.nodes[i], g0), b = idx(e.nodes[i + 1], g1);
+      if (dir === -1) [a, b] = [b, a];
+      let sec = meters(g0, g1) * factor / WALK_MPS;
+      if (t.highway === "elevator") sec += 30;
+      edges.push([a, b, Math.max(1, Math.round(sec * 10))]);
+      if (dir) oneway.push(edges.length - 1);
+    }
+  }
+  if (!pts.length) return null;
+  // drop tiny disconnected bits (a lone path in a parking lot) so snapping lands on the real network
+  const parent = pts.map((_, i) => i);
+  const find = x => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+  edges.forEach(([a, b]) => { const ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; });
+  const size = new Map();
+  pts.forEach((_, i) => { const r = find(i); size.set(r, (size.get(r) || 0) + 1); });
+  const keep = pts.map((_, i) => size.get(find(i)) >= minComponent);
+  const remap = new Int32Array(pts.length).fill(-1);
+  let lat0 = 0, lon0 = 0, kept = 0;
+  pts.forEach((p, i) => { if (keep[i]) { lat0 += p.lat; lon0 += p.lon; kept++; } });
+  if (!kept) return null;
+  lat0 = +(lat0 / kept).toFixed(4); lon0 = +(lon0 / kept).toFixed(4);
+  const n = [];
+  pts.forEach((p, i) => { if (keep[i]) { remap[i] = n.length / 2; n.push(Math.round((p.lat - lat0) * 1e6), Math.round((p.lon - lon0) * 1e6)); } });
+  const e = [], o = [], isOne = new Set(oneway);
+  edges.forEach(([a, b, c], k) => {
+    if (remap[a] < 0 || remap[b] < 0) return;
+    if (isOne.has(k)) o.push(e.length / 3);
+    e.push(remap[a], remap[b], c);
+  });
+  return { c: [lat0, lon0], n, e, o };
+}
 
 /* ---------------- Overture Maps places → app features ---------------- */
 // Overture category ids (snake_case). We match on substrings so renamed/sub-categories still land.
@@ -469,6 +524,6 @@ const AIRPORTS = AIRPORT_DATA.trim().split("\n").map(l => {
   return { code, name, city, st, wn: wn === "1" };
 });
 
-return { lookupAerodromes, loungeProgram, AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
+return { buildGraph, WALK_MPS, lookupAerodromes, loungeProgram, AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
   categorize, processOSM, categorizeOverture, sameName, mergeOverture, anchorPoints, MIN_CONF };
 });

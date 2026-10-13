@@ -100,6 +100,7 @@ async function build(codes) {
     try {
       const raw = await withRetry(code, () => core.overpass(core.featureQuery(ap), 180000), 2);
       const { feats, polys } = core.processOSM(raw.elements || []);
+      const graph = core.buildGraph(raw.elements || []);
       let places = [], stats = null;
       const ovPath = path.join(TMP, "overture", code + ".json");
       if (fs.existsSync(ovPath)) places = JSON.parse(fs.readFileSync(ovPath, "utf8"));
@@ -111,11 +112,11 @@ async function build(codes) {
         code, osmName: ap.name, website: ap.website, websiteSource: ap.websiteSource,
         center: ap.center, bounds: ap.bounds, generated: now,
         sources: { osm: now.slice(0, 10), overture: fs.existsSync(ovPath) ? release : null },
-        stats, counts, feats: merged.feats, polys,
+        stats, counts, feats: merged.feats, polys, g: graph,
       };
       fs.writeFileSync(path.join(DATA, code + ".json"), JSON.stringify(rec));
-      index.airports[code] = { generated: now, counts, overture: !!rec.sources.overture };
-      console.log(`${code}: ${JSON.stringify(counts)} · overture matched ${stats.matched}, added ${stats.added}`);
+      index.airports[code] = { generated: now, counts, overture: !!rec.sources.overture, walkNodes: graph ? graph.n.length / 2 : 0 };
+      console.log(`${code}: ${JSON.stringify(counts)} · overture matched ${stats.matched}, added ${stats.added} · walkway nodes ${graph ? graph.n.length / 2 : 0}`);
     } catch (e) {
       failed.push(code);
       console.log(`${code}: build failed — ${e.message} (keeping last week's file if there is one)`);
