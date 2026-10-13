@@ -2,7 +2,7 @@
 
 iPhone web app for finding your way around airports: gate search, food, restrooms, lounges, and ground transport (rental cars, rideshare, taxis, transit, parking). Works offline once an airport is saved.
 
-**Open on iPhone:** https://sfabiano09.github.io/airport-maps/ → Share → *Add to Home Screen*.
+**Open on iPhone:** https://sfabiano09.github.io/Airport-Maps/ → Share → *Add to Home Screen*.
 
 ## Where the data comes from
 
