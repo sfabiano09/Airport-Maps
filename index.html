@@ -174,6 +174,9 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .me{width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.25);transform:translate(-50%,-50%)}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
 .leaflet-popup-content{margin:12px 14px;font-size:14px;line-height:1.4}
+.ext{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.leaflet-popup-content a.xb{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:9px;background:var(--surface-2);
+  color:var(--ink);font-weight:620;font-size:13px;text-decoration:none;border:1px solid var(--line)}
 .leaflet-popup-content b{font-size:15px}
 .leaflet-popup-content .s{color:var(--ink-2);font-size:13px}
 .leaflet-container a.leaflet-popup-close-button{color:var(--ink-3)}
@@ -535,7 +538,8 @@ function popupHtml(f) {
   if (f.h) bits.push(`<div class="s">Hours: ${esc(f.h)}</div>`);
   const src = srcNote(f);
   if (src) bits.push(`<div class="s">${esc(src)}</div>`);
-  if (f.web) bits.push(`<div class="s"><a href="${esc(f.web)}" target="_blank" rel="noopener">Website</a></div>`);
+  const ext = placeLinks(f);
+  if (ext.length || f.web) bits.push(`<div class="ext">${ext.join("")}${f.web ? `<a class="xb" href="${esc(f.web)}" target="_blank" rel="noopener">Website</a>` : ""}</div>`);
   const from = origin();
   if (from && f !== selGate) {
     const w = walkInfo(f), who = selGate ? `gate ${esc(selGate.n)}` : "you";
@@ -722,12 +726,26 @@ function renderList() {
   $("items").innerHTML = html;
 }
 
+/* Look a place up in Google Maps or Yelp (reviews, photos, hours, whether it's still open).
+   These are plain links: nothing from Google or Yelp is copied into the app. */
+function placeLinks(f) {
+  if (!f.n || f.c === "gate" || f.c === "restroom" || f.c === "landmark") return [];
+  const apName = cur.osmName || cur.name;
+  const where = cur.city ? `${apName}, ${cur.city}` : apName;
+  const g = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${f.n} ${apName}`)}`;
+  const y = `https://www.yelp.com/search?find_desc=${encodeURIComponent(f.n)}&find_loc=${encodeURIComponent(where)}`;
+  const links = [`<a class="xb" href="${g}" target="_blank" rel="noopener">Google Maps</a>`];
+  if (f.c === "food" || f.c === "lounge") links.push(`<a class="xb" href="${y}" target="_blank" rel="noopener">Yelp reviews</a>`);
+  return links;
+}
 function externalLinks() {
   const name = cur.osmName || cur.name;
   const c = cur.center;
   return {
     apple: `https://maps.apple.com/?q=${encodeURIComponent(name)}&ll=${c.lat},${c.lon}&z=16`,
     google: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`,
+    googleFood: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("restaurants in " + name)}`,
+    yelp: `https://www.yelp.com/search?find_desc=${encodeURIComponent("restaurants")}&find_loc=${encodeURIComponent(cur.city ? name + ", " + cur.city : name)}`,
     site: cur.website,
   };
 }
@@ -907,6 +925,8 @@ function openMenu() {
   m.innerHTML = `
     <a href="${L2.apple}" target="_blank" rel="noopener">Open in Apple Maps (indoor maps)</a>
     <a href="${L2.google}" target="_blank" rel="noopener">Open in Google Maps</a>
+    <a href="${L2.googleFood}" target="_blank" rel="noopener">Restaurants here on Google Maps</a>
+    <a href="${L2.yelp}" target="_blank" rel="noopener">Restaurants here on Yelp</a>
     ${L2.site ? `<a href="${esc(L2.site)}" target="_blank" rel="noopener">Airport website &amp; official map</a>` : ""}
     <button id="mRefresh">Refresh map data now</button>
     <a href="https://www.openstreetmap.org/#map=17/${cur.center.lat}/${cur.center.lon}" target="_blank" rel="noopener">Fix missing info on OpenStreetMap</a>`;
