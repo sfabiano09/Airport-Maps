@@ -119,6 +119,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .menu{position:absolute;right:12px;top:calc(var(--safe-t) + 60px);z-index:1100;background:var(--surface);border-radius:12px;box-shadow:var(--shadow);min-width:240px;overflow:hidden}
 .menu a,.menu button{display:block;width:100%;text-align:left;padding:14px 16px;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
 .menu > :first-child{border-top:0}
+.locate.on{background:#2563eb;color:#fff}
 .locate{position:absolute;right:12px;z-index:1000;bottom:calc(var(--sheet-h) + 12px);transition:bottom .25s}
 
 .sheet{position:absolute;left:0;right:0;bottom:0;z-index:1000;background:var(--surface);border-radius:18px 18px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.14);
@@ -474,6 +475,7 @@ async function bulkDownload() {
    AIRPORT VIEW
    ============================================================ */
 const CATS = [
+  { k: "all", label: "All", color: null },
   { k: "food", label: "Food", color: "--c-food" },
   { k: "restroom", label: "Restrooms", color: "--c-restroom" },
   { k: "lounge", label: "Lounges", color: "--c-lounge" },
@@ -482,7 +484,11 @@ const CATS = [
 ];
 let map, layers = {}, tileLayer, meMarker;
 let cur = null;             // current airport record
-let tab = lsGet("tab", "food");
+let tab = lsGet("tab2", "all");
+let me = null;              // live location {lat, lon, acc} while tracking
+let meWatch = null, meCircle = null, meFollow = false;
+const PLACE_CATS = new Set(["food", "restroom", "lounge", "ground"]);
+const inTab = f => tab === "all" ? PLACE_CATS.has(f.c) : f.c === tab;
 let level = "all";
 let selGate = null;         // selected gate feature
 let markerById = {};
@@ -508,7 +514,11 @@ function zoomClasses() {
 function levelsOf(f) { return f.lv ? String(f.lv).split(/[;,]/).map(s => s.trim()).filter(Boolean) : []; }
 function onLevel(f) { if (level === "all") return true; const l = levelsOf(f); return !l.length || l.includes(level); }
 
-const subLabel = f => f.c === "lounge" ? (loungeProgram(f.n, f.s) || f.s) : f.s;
+const subLabel = f => {
+  if (f.c !== "lounge") return f.s;
+  const prog = loungeProgram(f.n, f.s);
+  return prog && prog.toLowerCase() !== (f.n || "").toLowerCase() ? prog : f.s;
+};
 function srcNote(f) {
   const when = f.u ? ` · updated ${f.u.slice(0, 7)}` : "";
   if (f.cl) return "May have closed (business listing says closed)" + when;
@@ -525,6 +535,7 @@ function popupHtml(f) {
   if (src) bits.push(`<div class="s">${esc(src)}</div>`);
   if (f.web) bits.push(`<div class="s"><a href="${esc(f.web)}" target="_blank" rel="noopener">Website</a></div>`);
   if (selGate && f !== selGate) { const m = meters(selGate, f); bits.push(`<div class="s">~${walkMin(m)} min walk from gate ${esc(selGate.n)} (${Math.round(m)} m straight line)</div>`); }
+  if (me) { const m = meters(me, f); bits.push(`<div class="s">~${walkMin(m)} min walk from you (${Math.round(m)} m straight line)</div>`); }
   return bits.join("");
 }
 
@@ -546,6 +557,8 @@ function drawAirport() {
       m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<span class="lm">${esc(f.s)}</span>`, iconSize: [0, 0] }) });
       m.addTo(layers.landmarks);
     } else {
+      // gates and landmarks always stay on the map; places follow the selected tab
+      if (!inTab(f)) continue;
       const col = cssVar(CATS.find(c => c.k === f.c).color);
       m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<div class="pw"><div class="pm${f.ap ? " ap" : ""}" style="${f.ap ? "border-color:" + col : "background:" + col}"></div>${f.n || f.c === "restroom" ? `<span class="pl">${esc(f.c === "lounge" ? f.n : (f.n || f.s))}</span>` : ""}</div>`, iconSize: [0, 0] }), zIndexOffset: f.c === tab ? 300 : 0 });
       m.addTo(layers.pois);
@@ -579,14 +592,15 @@ function renderLevels() {
 
 function renderTabs() {
   const counts = {};
-  cur.feats.forEach(f => { if (onLevel(f)) counts[f.c] = (counts[f.c] || 0) + 1; });
+  cur.feats.forEach(f => { if (onLevel(f)) { counts[f.c] = (counts[f.c] || 0) + 1; if (PLACE_CATS.has(f.c)) counts.all = (counts.all || 0) + 1; } });
+  const allDot = "conic-gradient(var(--c-food) 0 25%, var(--c-restroom) 0 50%, var(--c-lounge) 0 75%, var(--c-ground) 0)";
   $("tabs").innerHTML = CATS.map(c => `<button class="tab${tab === c.k ? " on" : ""}" data-tab="${c.k}">
-    <i style="background:var(${c.color})"></i>${c.label}<small>${counts[c.k] || 0}</small></button>`).join("");
+    <i style="background:${c.color ? `var(${c.color})` : allDot}"></i>${c.label}<small>${counts[c.k] || 0}</small></button>`).join("");
 }
 
 function renderList() {
-  const items = cur.feats.filter(f => f.c === tab && onLevel(f));
-  const from = selGate;
+  const items = cur.feats.filter(f => inTab(f) && onLevel(f));
+  const from = selGate || me;
   if (tab === "gate") items.sort((a, b) => natural(a.n, b.n));
   else if (from) items.forEach(f => f._d = meters(from, f)), items.sort((a, b) => a._d - b._d);
   else items.sort((a, b) => natural(a.n || a.s, b.n || b.s));
@@ -616,7 +630,7 @@ function externalLinks() {
 }
 function thinNote(k, partial) {
   const L2 = externalLinks();
-  const what = { food: "food", restroom: "restrooms", lounge: "lounges", ground: "ground transport", gate: "gates" }[k];
+  const what = { all: "places", food: "food", restroom: "restrooms", lounge: "lounges", ground: "ground transport", gate: "gates" }[k];
   const lead = partial ? `Only a few ${what} are mapped here, so the list may be incomplete.` : `No ${what} are mapped at this airport${level !== "all" ? " on this level" : ""}.`;
   return `<div class="thin">${lead} Try <a href="${L2.apple}" target="_blank" rel="noopener">Apple Maps</a>, which has indoor maps for many big airports${L2.site ? `, or the <a href="${esc(L2.site)}" target="_blank" rel="noopener">airport's website</a>` : ""}.</div>`;
 }
@@ -629,6 +643,7 @@ function renderStatus(extra) {
   const srcs = cur.sources && cur.sources.overture ? "OpenStreetMap + Overture" : "OpenStreetMap";
   let s = `Saved for offline · ${srcs} · built ${when}`;
   if (selGate) s = `Sorted by walking time from gate ${selGate.n} · straight-line estimate`;
+  else if (me) s = `Sorted by walking time from you · location accurate to ~${Math.round(me.acc)} m`;
   if (extra) s = extra;
   el.textContent = s;
   el.classList.toggle("warn", !!extra && /offline|couldn|busy/i.test(extra));
@@ -679,7 +694,7 @@ function selectGate(g) {
   $("sugg").classList.add("hidden");
   $("gx").classList.toggle("hidden", !g);
   if (g && level !== "all" && !onLevel(g)) level = "all";
-  if (g && tab === "gate") tab = "food";
+  if (g && tab === "gate") tab = "all";
   renderLevels(); renderTabs(); renderList(); renderStatus(); drawAirport();
   if (g) {
     map.flyTo([g.lat, g.lon], 18, { duration: .8 });
@@ -760,6 +775,7 @@ function showLoading(t) { $("loadingTxt").textContent = t; $("loading").classLis
 function hideLoading() { $("loading").classList.add("hidden"); }
 
 function goHome(fromHistory) {
+  if (meWatch !== null) stopLocating();
   $("airport").classList.add("hidden"); $("home").classList.remove("hidden");
   $("menu").classList.add("hidden");
   if (!fromHistory) history.pushState({}, "", location.pathname + location.search);
@@ -786,14 +802,36 @@ function openMenu() {
   };
 }
 
+/* Your location: tap once to show and follow it (the blue dot updates as you walk), tap again to stop.
+   Indoors the iPhone uses Wi-Fi as well as GPS, so accuracy is usually 5–30 m and it can't tell which floor you're on. */
 function locateMe() {
-  if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(p => {
-    const ll = [p.coords.latitude, p.coords.longitude];
+  if (!navigator.geolocation) { renderStatus("This browser can't share location"); return; }
+  if (meWatch !== null) { stopLocating(); return; }
+  meFollow = true;
+  $("locate").classList.add("on");
+  renderStatus("Finding your location…");
+  meWatch = navigator.geolocation.watchPosition(p => {
+    me = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy || 50 };
+    const ll = [me.lat, me.lon];
     if (meMarker) meMarker.setLatLng(ll);
-    else meMarker = L.marker(ll, { icon: L.divIcon({ className: "", html: '<div class="me"></div>', iconSize: [0, 0] }), zIndexOffset: 3000 }).addTo(map);
-    map.flyTo(ll, Math.max(map.getZoom(), 17.5), { duration: .6 });
-  }, () => renderStatus("Couldn't get your location (GPS is weak indoors)"), { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 });
+    else meMarker = L.marker(ll, { icon: L.divIcon({ className: "", html: '<div class="me"></div>', iconSize: [0, 0] }), zIndexOffset: 3000, interactive: false }).addTo(map);
+    if (meCircle) meCircle.setLatLng(ll).setRadius(me.acc);
+    else meCircle = L.circle(ll, { radius: me.acc, color: "#2563eb", weight: 1, fillColor: "#2563eb", fillOpacity: .12, interactive: false }).addTo(map);
+    if (meFollow) { map.flyTo(ll, Math.max(map.getZoom(), 17.5), { duration: .6 }); meFollow = false; }
+    if (cur && !selGate) { renderList(); renderStatus(); }
+  }, err => {
+    stopLocating();
+    renderStatus(err.code === 1 ? "Location is off for this app — turn on in Settings › Privacy › Location Services › Safari Websites"
+      : "Couldn't get your location right now (signal is weak indoors)");
+  }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 });
+}
+function stopLocating() {
+  if (meWatch !== null) navigator.geolocation.clearWatch(meWatch);
+  meWatch = null; me = null;
+  if (meMarker) { map.removeLayer(meMarker); meMarker = null; }
+  if (meCircle) { map.removeLayer(meCircle); meCircle = null; }
+  $("locate").classList.remove("on");
+  if (cur) { renderList(); renderStatus(); }
 }
 
 /* ============================================================
@@ -810,7 +848,7 @@ document.addEventListener("click", e => {
   const row = e.target.closest(".row[data-code]");
   if (row) { openAirport(row.dataset.code); return; }
   const tb = e.target.closest(".tab[data-tab]");
-  if (tb) { tab = tb.dataset.tab; lsSet("tab", tab); renderTabs(); renderList(); drawAirport(); $("items").scrollTop = 0; $("airport").classList.remove("collapsed"); return; }
+  if (tb) { tab = tb.dataset.tab; lsSet("tab2", tab); renderTabs(); renderList(); drawAirport(); $("items").scrollTop = 0; $("airport").classList.remove("collapsed"); return; }
   const it = e.target.closest(".item[data-id]");
   if (it) {
     const f = cur.feats.find(x => x.id === it.dataset.id);
