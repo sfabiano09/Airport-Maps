@@ -22,3 +22,7 @@ Airports not in the list can still be looked up live by code from OpenStreetMap.
 To rebuild now: **Actions → Build airport data → Run workflow** (optionally enter codes like `IND BWI`).
 
 Missing or wrong info? Fix it on OpenStreetMap (link in each airport's ⋯ menu) and it'll show up after the next weekly build.
+
+## Developer mode (fixing places in the field)
+
+In the app: ⋯ menu → **Developer mode**. Tap any place to **Drag pin**, use **I'm here** (GPS), confirm **Spot's right**, set its **Level**, or mark it **Gone**; **+ Add place** drops a new one. Edits apply instantly on the phone (offline too) and sync to `corrections/CODE.json` using a fine-grained GitHub token (this repo only, Contents read/write) stored in the phone's browser. The app loads those files for every visitor, and the weekly build bakes them into `data/`. Corrected places show "✓ Verified in person".

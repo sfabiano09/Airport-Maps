@@ -119,6 +119,37 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .menu{position:absolute;right:12px;top:calc(var(--safe-t) + 60px);z-index:1100;background:var(--surface);border-radius:12px;box-shadow:var(--shadow);min-width:240px;overflow:hidden}
 .menu a,.menu button{display:block;width:100%;text-align:left;padding:14px 16px;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
 .menu > :first-child{border-top:0}
+/* developer mode */
+.devbar{display:flex;gap:6px;align-items:center;margin-top:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.devbar::-webkit-scrollbar{display:none}
+.devbar > *{flex:none;height:30px;border-radius:15px;padding:0 11px;font-size:13px;font-weight:650;display:flex;align-items:center;gap:5px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.devbar .dtag{background:#7c3aed;color:#fff}
+.devbar button{background:var(--surface);color:var(--ink)}
+.devbar button.on{background:var(--ink);color:var(--bg)}
+.devbar button.warn{background:#f59e0b;color:#1b1d21}
+.devacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.devacts .lvl{font-size:12px;font-weight:650;color:var(--ink-3);align-self:center;margin-left:2px}
+.dev .leaflet-popup-content{max-height:46vh;overflow-y:auto}
+.devacts .lbl{width:100%;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#7c3aed}
+.leaflet-popup-content button.db{height:30px;padding:0 9px;border-radius:9px;border:1.5px solid #7c3aed;color:#7c3aed;font-weight:650;font-size:13px;background:transparent}
+.leaflet-popup-content button.db.sm{height:28px;min-width:30px;padding:0 7px}
+.leaflet-popup-content button.db.on{background:#7c3aed;color:#fff}
+.moving .pm{animation:pulse 1.2s ease-out infinite;transform:scale(1.4)}
+.panel{position:absolute;left:0;right:0;bottom:0;z-index:1300;background:var(--surface);border-radius:18px 18px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.25);
+  padding:16px 16px calc(var(--safe-b) + 16px);max-height:80vh;overflow-y:auto}
+.panel h3{margin:0 0 6px;font-size:18px}
+.panel p{margin:0 0 10px;color:var(--ink-2);font-size:14px}
+.panel ol{margin:0 0 12px 18px;padding:0;color:var(--ink-2);font-size:14px}
+.panel ol li{margin-bottom:4px}
+.panel input{width:100%;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);padding:0 12px;font-size:16px;margin:4px 0 10px;color:var(--ink)}
+.panel .row{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 12px}
+.panel .opt{height:34px;padding:0 12px;border-radius:17px;border:1px solid var(--line);font-weight:620;font-size:14px}
+.panel .opt.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.panel .small{font-size:12px;color:var(--ink-3)}
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--sheet-h) + 70px);z-index:1250;background:var(--ink);color:var(--bg);border-radius:12px;
+  padding:10px 14px;font-size:14px;font-weight:550;display:flex;gap:12px;align-items:center;max-width:92vw;box-shadow:var(--shadow)}
+.toast button{color:#c4b5fd;font-weight:700}
 .locate.on{background:#2563eb;color:#fff}
 .locate{position:absolute;right:12px;z-index:1000;bottom:calc(var(--sheet-h) + 12px);transition:bottom .25s}
 
@@ -256,6 +287,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
     </div>
     <div class="sugg hidden" id="sugg"></div>
     <div class="chips hidden" id="levels"></div>
+    <div class="devbar hidden" id="devbar"></div>
   </div>
 
   <div class="menu hidden" id="menu"></div>
@@ -272,12 +304,14 @@ button{cursor:pointer;border:0;background:none;padding:0}
     <div class="items" id="items"></div>
   </div>
 
+  <div class="panel hidden" id="panel"></div>
+  <div class="toast hidden" id="toast"></div>
   <div class="loading hidden" id="loading"><div class="spin"></div><span id="loadingTxt">Loading map…</span></div>
 </section>
 
 <script>
 "use strict";
-const { buildGraph, WALK_MPS, loungeProgram, AIRPORT_DATA, OVERPASS, meters, lookupAerodrome, featureQuery, processOSM } = AirportCore;
+const { applyCorrections, sameName, buildGraph, WALK_MPS, loungeProgram, AIRPORT_DATA, OVERPASS, meters, lookupAerodrome, featureQuery, processOSM } = AirportCore;
 /* ============================================================
    Airport list — every US airport Southwest serves (Oct 2026)
    plus the major hubs it doesn't. WN = Southwest.
@@ -506,7 +540,7 @@ let tab = lsGet("tab2", "all");
 let me = null;              // live location {lat, lon, acc} while tracking
 let meWatch = null, meCircle = null, meFollow = false;
 const PLACE_CATS = new Set(["food", "shop", "restroom", "lounge", "ground"]);
-const inTab = f => tab === "all" ? PLACE_CATS.has(f.c) : f.c === tab;
+const inTab = f => (tab === "all" ? PLACE_CATS.has(f.c) : f.c === tab) && (!devApprox || f.ap || f.c === "gate");
 let level = "all";
 let selGate = null;         // selected gate feature
 let markerById = {};
@@ -521,6 +555,7 @@ function ensureMap() {
   }).addTo(map);
   map.on("zoomend", zoomClasses);
   map.on("moveend resize popupopen popupclose", scheduleLabels);
+  map.on("popupopen", wireDevButtons);
   map.on("click", () => { $("menu").classList.add("hidden"); $("sugg").classList.add("hidden"); });
 }
 function zoomClasses() {
@@ -711,6 +746,7 @@ const subLabel = f => {
   return prog && prog.toLowerCase() !== (f.n || "").toLowerCase() ? prog : f.s;
 };
 function srcNote(f) {
+  if (f.me) return `✓ Verified in person${/^\d{4}-\d\d/.test(f.me) ? " · " + f.me.slice(0, 10) : ""}`;
   const when = f.u ? ` · updated ${f.u.slice(0, 7)}` : "";
   if (f.cl) return "May have closed (business listing says closed)" + when;
   const src = f.src || "";
@@ -736,7 +772,262 @@ function popupHtml(f) {
       ? `<div class="s"><b>${mins(w)} min walk</b> from ${who} · route shown on map</div>`
       : `<div class="s">~${mins(w)} min from ${who} — straight-line estimate (no mapped walkway route)</div>`);
   }
+  if (dev) bits.push(devActions(f));
   return bits.join("");
+}
+
+/* ============================================================
+   DEVELOPER MODE — fix places in the field
+   Edits are saved on the phone right away (and work offline), then synced to corrections/CODE.json in the
+   GitHub repo with your own access token, so every device and the weekly build pick them up.
+   ============================================================ */
+let dev = lsGet("dev", false), devApprox = false, base = null, moving = null;
+const OWNER = location.hostname.endsWith(".github.io") ? location.hostname.split(".")[0] : "sfabiano09";
+const REPO = location.hostname.endsWith(".github.io") ? (location.pathname.split("/")[1] || "Airport-Maps") : "Airport-Maps";
+const edits = { local: code => lsGet("corrL:" + code, []), remote: code => lsGet("corrR:" + code, []) };
+function allEdits(code) {
+  const seen = new Set(), out = [];
+  for (const e of edits.remote(code).concat(edits.local(code))) { const k = e.id + "|" + e.at; if (!seen.has(k)) { seen.add(k); out.push(e); } }
+  return out;
+}
+function setCur(rec) { base = rec; cur = { ...rec, feats: applyCorrections(rec.feats, allEdits(rec.code)) }; }
+function refreshEdits() {
+  if (!base) return;
+  const gid = selGate && selGate.id;
+  setCur(base);
+  selGate = gid ? cur.feats.find(f => f.id === gid) || null : null;
+  renderAll(); renderDevbar();
+}
+function pendingCount() {
+  let n = 0;
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("corrL:")) n += lsGet(k, []).filter(e => !e.synced).length; } } catch {}
+  return n;
+}
+function addEdit(e) {
+  const code = cur.code, f = cur.feats.find(x => x.id === e.id);
+  const edit = { id: e.id, n: e.n ?? (f && f.n) ?? "", c: e.c ?? (f && f.c) ?? "", at: new Date().toISOString(), ...e };
+  const list = edits.local(code); list.push(edit); lsSet("corrL:" + code, list);
+  refreshEdits();
+  if (navigator.onLine && lsGet("ghTok", "")) syncEdits().catch(() => {});
+  return edit;
+}
+function toast(msg, action, fn, ms = 5000) {
+  const t = $("toast");
+  t.innerHTML = `<span>${esc(msg)}</span>${action ? `<button>${esc(action)}</button>` : ""}`;
+  t.classList.remove("hidden");
+  if (action) t.querySelector("button").onclick = () => { t.classList.add("hidden"); fn(); };
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add("hidden"), ms);
+}
+function knownLevels() {
+  const set = new Set(); cur.feats.forEach(f => levelsOf(f).forEach(l => set.add(l)));
+  const lv = [...set].sort((a, b) => parseFloat(a) - parseFloat(b) || natural(a, b));
+  return lv.length ? lv.slice(0, 6) : ["0", "1", "2", "3"];
+}
+function devActions(f) {
+  const mine = allEdits(cur.code).some(e => e.id === f.id && !e.undo);
+  const lv = knownLevels().map(l => `<button class="db sm${String(f.lv) === l ? " on" : ""}" data-dev="lv" data-v="${esc(l)}" data-id="${esc(f.id)}">${esc(l)}</button>`).join("");
+  return `<div class="devacts"><div class="lbl">Developer${f.ap ? " · location approximate" : ""}</div>
+    <button class="db" data-dev="move" data-id="${esc(f.id)}">Drag pin</button>
+    <button class="db" data-dev="here" data-id="${esc(f.id)}">I'm here</button>
+    ${f.ap ? `<button class="db" data-dev="ok" data-id="${esc(f.id)}">Spot's right</button>` : ""}
+    <button class="db" data-dev="gone" data-id="${esc(f.id)}">Gone</button>
+    ${mine ? `<button class="db" data-dev="undo" data-id="${esc(f.id)}">Undo</button>` : ""}
+    <span class="lvl">Level</span>${lv}</div>`;
+}
+function wireDevButtons(e) {
+  if (!dev) return;
+  // the edit buttons need room: tuck the list away while a place is open
+  if (sheetState() !== "collapsed") { setSheet("collapsed"); setTimeout(() => e.popup.isOpen() && e.popup.update(), 320); }
+  const el = e.popup.getElement(); if (!el || el._devWired) return;
+  el._devWired = true;          // one listener on the popup box; survives content refreshes
+  el.addEventListener("click", ev => {
+    const b = ev.target.closest("[data-dev]"); if (!b || !dev) return;
+    ev.preventDefault(); ev.stopPropagation();
+    const f = cur.feats.find(x => x.id === b.dataset.id); if (!f) return;
+    const act = b.dataset.dev, name = f.c === "gate" ? "Gate " + f.n : (f.n || f.s);
+    if (act === "move") { map.closePopup(); startMove(f); }
+    else if (act === "here") { map.closePopup(); hereFix(f); }
+    else if (act === "ok") { map.closePopup(); addEdit({ id: f.id, lat: f.lat, lon: f.lon }); toast(`${name} confirmed in place`, "Undo", () => addEdit({ id: f.id, undo: true })); }
+    else if (act === "gone") { map.closePopup(); addEdit({ id: f.id, gone: true }); toast(`${name} hidden — not here anymore`, "Undo", () => addEdit({ id: f.id, undo: true })); }
+    else if (act === "undo") { map.closePopup(); addEdit({ id: f.id, undo: true }); toast(`Your edits to ${name} were undone`); }
+    else if (act === "lv") { addEdit({ id: f.id, lv: b.dataset.v }); map.closePopup(); toast(`${name}: level ${b.dataset.v}`); }
+  });
+}
+function startMove(f) {
+  const m = markerById[f.id]; if (!m) return;
+  moving = f;
+  // make room: tuck the list away and bring the pin to the middle of the map
+  if (sheetState() !== "collapsed") setSheet("collapsed");
+  map.setView([f.lat, f.lon], Math.max(map.getZoom(), 18.5), { animate: false });
+  const el = m.getElement(); if (el) el.classList.add("moving");
+  m.dragging.enable();
+  toast(`Drag ${f.n || f.s} to where it really is — it saves when you let go`, "Cancel", () => stopMove(), 20000);
+  m.once("dragend", () => {
+    const ll = m.getLatLng();
+    stopMove(true);
+    addEdit({ id: f.id, lat: +ll.lat.toFixed(7), lon: +ll.lng.toFixed(7) });
+    toast(`${f.n || f.s} moved and marked verified`, "Undo", () => addEdit({ id: f.id, undo: true }));
+  });
+}
+function stopMove(keep) {
+  if (!moving) return;
+  const m = markerById[moving.id];
+  if (m) { m.dragging.disable(); const el = m.getElement(); if (el) el.classList.remove("moving"); m.off("dragend"); if (!keep) m.setLatLng([moving.lat, moving.lon]); }
+  moving = null;
+  if (!keep) $("toast").classList.add("hidden");
+}
+function hereFix(f) {
+  if (!navigator.geolocation) { toast("This phone can't share location here"); return; }
+  toast("Getting your position…", null, null, 15000);
+  navigator.geolocation.getCurrentPosition(p => {
+    const acc = Math.round(p.coords.accuracy || 999);
+    if (acc > 35) { toast(`GPS is only accurate to ±${acc} m in here — use "Drag to fix" instead`, "Drag", () => startMove(f), 9000); return; }
+    addEdit({ id: f.id, lat: +p.coords.latitude.toFixed(7), lon: +p.coords.longitude.toFixed(7), acc });
+    toast(`${f.n || f.s} moved to your spot (±${acc} m)`, "Undo", () => addEdit({ id: f.id, undo: true }));
+  }, err => toast(err.code === 1 ? "Location is off for this app (Settings › Privacy › Location Services)" : "Couldn't get your position"),
+  { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+}
+
+/* ---- add a place that's missing ---- */
+const ADD_CATS = [["food", "Food", "Food"], ["shop", "Shop", "Shop"], ["restroom", "Restroom", "Restroom"], ["lounge", "Lounge", "Lounge"], ["ground", "Ground transport", "Ground transport"]];
+function startAdd() {
+  toast("Tap the map where the new place is", "Cancel", () => map.off("click", addAt), 20000);
+  map.once("click", addAt);
+}
+function addAt(e) {
+  $("toast").classList.add("hidden");
+  const ll = e.latlng; let cat = "food", lv = level !== "all" ? level : "";
+  const P = $("panel");
+  const draw = () => {
+    P.innerHTML = `<h3>Add a place</h3>
+      <input id="aName" placeholder="Name (e.g. Shake Shack)" autocomplete="off">
+      <div class="small">Type</div>
+      <div class="row">${ADD_CATS.map(([k, l]) => `<button class="opt${cat === k ? " on" : ""}" data-cat="${k}">${l}</button>`).join("")}</div>
+      <div class="small">Level</div>
+      <div class="row"><button class="opt${!lv ? " on" : ""}" data-lv="">?</button>${knownLevels().map(l => `<button class="opt${lv === l ? " on" : ""}" data-lv="${esc(l)}">${esc(l)}</button>`).join("")}</div>
+      <div class="acts"><button class="btn ghost" id="aCancel">Cancel</button><button class="btn" id="aSave">Add</button></div>`;
+  };
+  draw(); P.classList.remove("hidden");
+  P.onclick = ev => {
+    const c = ev.target.closest("[data-cat]"), l = ev.target.closest("[data-lv]");
+    const name = $("aName") ? $("aName").value : "";
+    if (c) { cat = c.dataset.cat; draw(); $("aName").value = name; }
+    else if (l) { lv = l.dataset.lv; draw(); $("aName").value = name; }
+    else if (ev.target.id === "aCancel") P.classList.add("hidden");
+    else if (ev.target.id === "aSave") {
+      const n = name.trim();
+      if (!n && cat !== "restroom") { $("aName").focus(); return; }
+      const label = ADD_CATS.find(x => x[0] === cat)[2];
+      const id = "me-" + Date.now().toString(36);
+      addEdit({ id, n: n || label, c: cat, add: { c: cat, s: label, n: n || (cat === "restroom" ? "" : label) }, lat: +ll.lat.toFixed(7), lon: +ll.lng.toFixed(7), lv });
+      P.classList.add("hidden");
+      toast(`Added ${n || label}`, "Undo", () => addEdit({ id, undo: true }));
+    }
+  };
+  setTimeout(() => $("aName") && $("aName").focus(), 50);
+}
+
+/* ---- sync to GitHub ---- */
+const b64enc = str => btoa(unescape(encodeURIComponent(str)));
+const b64dec = b => decodeURIComponent(escape(atob(b.replace(/\s/g, ""))));
+async function gh(path, opts = {}) {
+  const tok = lsGet("ghTok", "");
+  return fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+    ...opts, headers: { Authorization: "Bearer " + tok, Accept: "application/vnd.github+json", "Content-Type": "application/json", ...(opts.headers || {}) },
+  });
+}
+let syncing = false;
+async function syncEdits() {
+  if (syncing || !lsGet("ghTok", "")) return;
+  syncing = true; renderDevbar();
+  let ok = 0, err = "";
+  try {
+    const codes = [];
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("corrL:") && lsGet(k, []).some(e => !e.synced)) codes.push(k.slice(6)); }
+    for (const code of codes) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const path = `corrections/${code}.json`;
+        const r = await gh(path + "?ref=main", { cache: "no-store" });
+        if (r.status === 401 || r.status === 403) { err = "GitHub didn't accept the token"; break; }
+        let remote = [], sha;
+        if (r.ok) { const j = await r.json(); sha = j.sha; try { remote = JSON.parse(b64dec(j.content)); } catch {} }
+        else if (r.status !== 404) { err = "GitHub error " + r.status; break; }
+        const local = edits.local(code), pend = local.filter(e => !e.synced).map(({ synced, ...e }) => e);
+        const seen = new Set(remote.map(e => e.id + "|" + e.at));
+        const merged = remote.concat(pend.filter(e => !seen.has(e.id + "|" + e.at)));
+        const put = await gh(path, { method: "PUT", body: JSON.stringify({
+          message: `Field corrections at ${code} (${pend.length} from the app)`,
+          content: b64enc(JSON.stringify(merged, null, 1) + "\n"), branch: "main", ...(sha ? { sha } : {}) }) });
+        if (put.status === 409 || put.status === 422) continue;          // someone else saved first: re-read and retry
+        if (!put.ok) { err = put.status === 401 || put.status === 403 ? "GitHub didn't accept the token" : "GitHub error " + put.status; break; }
+        lsSet("corrL:" + code, local.map(e => ({ ...e, synced: true })));
+        lsSet("corrR:" + code, merged);
+        ok += pend.length; break;
+      }
+      if (err) break;
+    }
+  } catch (e) { err = "Couldn't reach GitHub"; }
+  syncing = false; renderDevbar();
+  if (err) toast(err + " — edits are kept on this phone", "Settings", openSyncSettings, 8000);
+  else if (ok) toast(`Synced ${ok} edit${ok === 1 ? "" : "s"} to GitHub`);
+}
+async function loadRemoteEdits(code, token) {
+  if (!navigator.onLine) return;
+  try {
+    const r = await fetch(`corrections/${code}.json`, { cache: "no-cache" });
+    if (!r.ok) return;
+    const list = await r.json();
+    if (JSON.stringify(list) === JSON.stringify(edits.remote(code))) return;
+    lsSet("corrR:" + code, list);
+    if (token === loadToken && cur && cur.code === code) refreshEdits();
+  } catch {}
+}
+function openSyncSettings() {
+  const P = $("panel"), has = !!lsGet("ghTok", "");
+  P.innerHTML = `<h3>Sync edits to GitHub</h3>
+    <p>Your fixes are always saved on this phone first. With a GitHub token they're also saved to <b>${esc(OWNER)}/${esc(REPO)}</b>, so they show on every device and get built into the map each week.</p>
+    <ol>
+      <li>On GitHub: <b>Settings › Developer settings › Personal access tokens › Fine-grained tokens › Generate new token</b>.</li>
+      <li>Repository access: <b>Only select repositories › ${esc(REPO)}</b>.</li>
+      <li>Permissions: <b>Contents › Read and write</b>. Nothing else.</li>
+      <li>Generate, copy the token, and paste it below.</li>
+    </ol>
+    <input id="tok" type="password" placeholder="${has ? "Token saved — paste a new one to replace it" : "github_pat_…"}" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <p class="small">The token stays in this phone's browser only. It never goes into the app's code or the repo.</p>
+    <div class="acts">${has ? `<button class="btn ghost" id="tokDel">Remove token</button>` : ""}<button class="btn ghost" id="tokCancel">Close</button><button class="btn" id="tokSave">Save &amp; sync</button></div>`;
+  P.classList.remove("hidden");
+  P.onclick = ev => {
+    if (ev.target.id === "tokCancel") P.classList.add("hidden");
+    if (ev.target.id === "tokDel") { lsSet("ghTok", ""); P.classList.add("hidden"); renderDevbar(); toast("Token removed from this phone"); }
+    if (ev.target.id === "tokSave") {
+      const v = $("tok").value.trim();
+      if (v) lsSet("ghTok", v);
+      P.classList.add("hidden"); renderDevbar(); syncEdits();
+    }
+  };
+}
+
+function renderDevbar() {
+  const bar = $("devbar");
+  document.body.classList.toggle("dev", dev);
+  if (!dev || !cur) { bar.classList.add("hidden"); return; }
+  const approx = cur.feats.filter(f => f.ap).length, pend = pendingCount(), tok = !!lsGet("ghTok", "");
+  bar.classList.remove("hidden");
+  bar.innerHTML = `<span class="dtag">Developer</span>
+    <button id="dvApprox" class="${devApprox ? "on" : ""}">Only approximate · ${approx}</button>
+    <button id="dvAdd">+ Add place</button>
+    <button id="dvSync" class="${pend && !tok ? "warn" : ""}">${syncing ? "Syncing…" : pend ? `${pend} to sync` : tok ? "Synced ✓" : "Sync setup"}</button>`;
+  $("dvApprox").onclick = () => { devApprox = !devApprox; renderAll(); renderDevbar(); };
+  $("dvAdd").onclick = startAdd;
+  $("dvSync").onclick = () => (tok && pend ? syncEdits() : openSyncSettings());
+}
+function setDev(on) {
+  dev = on; lsSet("dev", on);
+  if (!on) { devApprox = false; stopMove(); $("panel").classList.add("hidden"); }
+  map && map.closePopup();
+  if (cur) renderAll();
+  renderDevbar();
+  toast(on ? "Developer mode on — tap any place to fix it" : "Developer mode off");
 }
 
 function drawAirport() {
@@ -764,7 +1055,7 @@ function drawAirport() {
       m = L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: `<div class="pw"><div class="pm${f.ap ? " ap" : ""}" style="${f.ap ? "border-color:" + col : "background:" + col}"></div>${f.n || f.c === "restroom" ? `<span class="pl">${esc(f.c === "lounge" ? f.n : (f.n || f.s))}</span>` : ""}</div>`, iconSize: [0, 0] }), zIndexOffset: f.c === tab ? 300 : 0 });
       m.addTo(layers.pois);
     }
-    m.bindPopup(() => popupHtml(f), { maxWidth: 240, offset: [0, -4], autoPanPaddingTopLeft: [10, 170], autoPanPaddingBottomRight: [10, 20] });
+    m.bindPopup(() => popupHtml(f), { maxWidth: 250, offset: [0, -4], autoPanPaddingTopLeft: [10, dev ? 215 : 170], autoPanPaddingBottomRight: [10, 100] });
     m.on("popupopen", () => drawRoute(f));
     m.on("popupclose", clearRoute);
     m._f = f;
@@ -973,7 +1264,7 @@ function renderAll() {
   $("apTitle").textContent = `${cur.code} · ${cur.name}`;
   $("apSub").textContent = cur.city || cur.osmName || "";
   renderLevels(); renderAreas(); renderTabs(); renderList(); renderStatus();
-  drawAirport();
+  drawAirport(); renderDevbar();
 }
 
 /* ---------- gate search ---------- */
@@ -1042,7 +1333,7 @@ async function openAirport(code, opts = {}) {
 
   let rec = await DB.get(code);
   if (rec && rec.v === DATA_VERSION) {
-    cur = rec; renderAll(); fitAirport(); restoreGate();
+    setCur(rec); renderAll(); fitAirport(); restoreGate(); loadRemoteEdits(code, token);
     if (isStale(rec) && navigator.onLine) refreshInBackground(code, token);
     else if (rec.bundled && navigator.onLine) {
       // a newer weekly build? (index.json is small)
@@ -1073,7 +1364,7 @@ async function openAirport(code, opts = {}) {
       $("loadingTxt").textContent = "Loading gates, food and restrooms…";
     });
     if (token !== loadToken) return;
-    cur = rec; renderAll(); fitAirport(); refreshSaved();
+    setCur(rec); renderAll(); fitAirport(); refreshSaved(); loadRemoteEdits(code, token);
   } catch (e) {
     if (token !== loadToken) return;
     $("status").textContent = "";
@@ -1089,7 +1380,7 @@ async function refreshInBackground(code, token) {
     const rec = await fetchAirport(code);
     if (token !== loadToken) return;
     const gid = selGate && selGate.id;
-    cur = rec; renderAll();
+    setCur(rec); renderAll();
     if (gid) { const g = cur.feats.find(f => f.id === gid); if (g) selectGate(g); }
   } catch { if (token === loadToken) renderStatus(); }
 }
@@ -1103,6 +1394,7 @@ function showLoading(t) { $("loadingTxt").textContent = t; $("loading").classLis
 function hideLoading() { $("loading").classList.add("hidden"); }
 
 function goHome(fromHistory) {
+  stopMove(); $("panel").classList.add("hidden");
   if (meWatch !== null) stopLocating();
   $("airport").classList.add("hidden"); $("home").classList.remove("hidden");
   $("menu").classList.add("hidden");
@@ -1124,8 +1416,10 @@ function openMenu() {
     <a href="${L2.yelp}" target="_blank" rel="noopener">Restaurants here on Yelp</a>
     ${L2.site ? `<a href="${esc(L2.site)}" target="_blank" rel="noopener">Airport website &amp; official map</a>` : ""}
     <button id="mRefresh">Refresh map data now</button>
+    <button id="mDev">Developer mode: ${dev ? "<b>On</b>" : "Off"}</button>
     <a href="https://www.openstreetmap.org/#map=17/${cur.center.lat}/${cur.center.lon}" target="_blank" rel="noopener">Fix missing info on OpenStreetMap</a>`;
   m.classList.remove("hidden");
+  $("mDev").onclick = () => { m.classList.add("hidden"); setDev(!dev); };
   $("mRefresh").onclick = () => {
     m.classList.add("hidden");
     if (!navigator.onLine) { renderStatus("Offline · can't refresh right now"); return; }
@@ -1270,7 +1564,7 @@ function setSheet(st) {
 })();
 $("bulkGo").onclick = bulkDownload;
 $("bulkStop").onclick = () => { bulkStop = true; $("bulkTxt").textContent = "Stopping after this airport…"; };
-window.addEventListener("online", setNet); window.addEventListener("offline", setNet);
+window.addEventListener("online", () => { setNet(); if (pendingCount()) syncEdits(); }); window.addEventListener("offline", setNet);
 window.addEventListener("popstate", e => {
   const code = (location.hash || "").slice(1).toUpperCase();
   if (/^[A-Z]{3}$/.test(code)) openAirport(code, { fromHistory: true }); else goHome(true);

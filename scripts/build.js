@@ -120,6 +120,15 @@ async function build(codes) {
           console.log(`  ${code} official listing: ${JSON.stringify(m.stats)}`);
         } catch (e) { console.log(`  ${code} official listing unavailable: ${e.message}`); }
       }
+      // field corrections made in the app's Developer mode
+      const corrPath = path.join(ROOT, "corrections", code + ".json");
+      if (fs.existsSync(corrPath)) {
+        try {
+          const corr = JSON.parse(fs.readFileSync(corrPath, "utf8"));
+          merged.feats = core.applyCorrections(merged.feats, corr);
+          console.log(`  ${code} field corrections applied: ${corr.length}`);
+        } catch (e) { console.log(`  ${code} corrections file unreadable: ${e.message}`); }
+      }
       stats = merged.stats;
       const counts = {};
       merged.feats.forEach(f => { counts[f.c] = (counts[f.c] || 0) + 1; });

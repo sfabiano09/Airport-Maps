@@ -558,6 +558,44 @@ function mergeOfficial(feats, places) {
   return { feats: out, stats };
 }
 
+/* Field corrections made in the app's Developer mode (corrections/CODE.json in the repo, plus edits
+   still waiting on the phone). Each one is keyed by the place's id, with its name/category as a fallback
+   in case the id changes between builds:
+   { id, n, c, at, lat?, lon?, lv?, gone?, add?: {c, s, n}, undo? }
+   - lat/lon: moves the place and marks it verified in person (no longer "approximate")
+   - lv: sets the floor level      - gone: the place isn't there any more (hidden)
+   - add: a place that wasn't on the map at all      - undo: cancels an earlier edit with the same id
+   Returns a new feats array; the input is not modified. */
+function applyCorrections(feats, corrs) {
+  const out = feats.map(f => ({ ...f }));
+  // combine edits per place in time order (a move then a level change both count); "undo" clears earlier ones
+  const latest = new Map();
+  for (const c of (corrs || []).filter(c => c && c.id).sort((a, b) => String(a.at || "").localeCompare(String(b.at || "")))) {
+    if (c.undo) { latest.set(c.id, { id: c.id, undo: true }); continue; }
+    const prev = latest.get(c.id);
+    latest.set(c.id, prev && !prev.undo ? { ...prev, ...c } : { ...c });
+  }
+  const gone = new Set();
+  for (const c of latest.values()) {
+    if (c.undo) continue;
+    let f = out.find(x => x.id === c.id);
+    if (!f && c.n && isFinite(c.lat)) {
+      let bd = 400;
+      for (const x of out) if ((!c.c || x.c === c.c) && x.n && sameName(x.n, c.n)) { const d = meters(x, c); if (d < bd) { bd = d; f = x; } }
+    }
+    if (!f && c.add && isFinite(c.lat)) {
+      f = { id: c.id, c: c.add.c, s: c.add.s || "", n: c.add.n || "", lat: +c.lat, lon: +c.lon, lv: c.lv || "", src: "me" };
+      out.push(f);
+    }
+    if (!f) continue;
+    if (c.gone) { gone.add(f); continue; }
+    if (isFinite(c.lat) && isFinite(c.lon)) { f.lat = +(+c.lat).toFixed(7); f.lon = +(+c.lon).toFixed(7); delete f.ap; }
+    if (c.lv !== undefined && c.lv !== null) f.lv = String(c.lv);
+    f.me = String(c.at || "").slice(0, 10) || "yes";
+  }
+  return gone.size ? out.filter(f => !gone.has(f)) : out;
+}
+
 function anchorPoints(feats, polys) {
   const anchors = [];
   feats.forEach(f => { if (f.c === "gate") anchors.push(f); });
@@ -590,6 +628,6 @@ const AIRPORTS = AIRPORT_DATA.trim().split("\n").map(l => {
   return { code, name, city, st, wn: wn === "1" };
 });
 
-return { mergeOfficial, buildGraph, WALK_MPS, lookupAerodromes, loungeProgram, AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
+return { applyCorrections, mergeOfficial, buildGraph, WALK_MPS, lookupAerodromes, loungeProgram, AIRPORT_DATA, AIRPORTS, OVERPASS, meters, overpass, lookupAerodrome, bboxStr, featureQuery,
   categorize, processOSM, categorizeOverture, sameName, mergeOverture, anchorPoints, MIN_CONF };
 });
