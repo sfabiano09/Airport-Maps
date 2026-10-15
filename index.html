@@ -169,14 +169,16 @@ button{cursor:pointer;border:0;background:none;padding:0}
   box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 30%,transparent);animation:pulse 1.6s ease-out infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}100%{box-shadow:0 0 0 16px transparent}}
 .hide-gates .gp:not(.sel){display:none}
+.leaflet-zoom-anim .pl.on{opacity:0}
 .pm{width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-50%,-50%)}
 .pm.ap{background:var(--surface);border-style:dashed;border-width:2px;opacity:.9}
 .pw{position:relative;transform:translate(-50%,-50%);display:inline-block}
 .pw .pm{transform:none}
-.pl{position:absolute;left:14px;top:50%;transform:translateY(-50%);white-space:nowrap;font:650 12px/1.15 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+.pl{position:absolute;left:20px;top:-2px;white-space:nowrap;font:650 12px/1.15 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
   color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 6px;box-shadow:0 1px 3px rgba(0,0,0,.18);
   max-width:150px;overflow:hidden;text-overflow:ellipsis;display:none}
-.show-labels .pl{display:block}
+.pl.on{display:block}
+.gp.off,.lm.off{visibility:hidden}
 .hide-pois .pm{width:10px;height:10px;border-width:1.5px}
 .lm{font-size:11px;font-weight:700;color:var(--c-landmark);background:var(--surface);border-radius:5px;padding:2px 5px;white-space:nowrap;transform:translate(-50%,-50%);display:inline-block;border:1px solid var(--line)}
 .hide-gates .lm{display:none}
@@ -518,13 +520,106 @@ function ensureMap() {
     maxZoom: 21, maxNativeZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
   map.on("zoomend", zoomClasses);
+  map.on("moveend resize popupopen popupclose", scheduleLabels);
   map.on("click", () => { $("menu").classList.add("hidden"); $("sugg").classList.add("hidden"); });
 }
 function zoomClasses() {
   const z = map.getZoom(), el = $("map");
-  el.classList.toggle("hide-gates", z < 16.5);
+  el.classList.toggle("hide-gates", z < 15.5);
   el.classList.toggle("hide-pois", z < 16);
-  el.classList.toggle("show-labels", z >= 17.5);
+  scheduleLabels();
+}
+
+/* ---------- Label placement ----------
+   Names never overlap each other, the dots, or gate numbers. Each name tries right, left, above, below
+   (and the four corners) of its dot and takes the first spot that's free; names that don't fit stay hidden
+   until you zoom in further. Gate numbers that would sit on top of each other are thinned the same way.
+   Priority: the selected gate, the place whose popup is open, then places nearest the gate / you /
+   the middle of the screen. */
+let labelRaf = 0;
+function scheduleLabels() { if (!labelRaf) labelRaf = requestAnimationFrame(() => { labelRaf = 0; layoutLabels(); }); }
+const measureCtx = document.createElement("canvas").getContext("2d");
+function textW(t, font) { measureCtx.font = font; return measureCtx.measureText(t).width; }
+const LABEL_FONT = '650 12px -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif';
+const GATE_FONT = '700 11px ui-monospace, "SF Mono", Menlo, monospace';
+function layoutLabels() {
+  if (!map || !cur) return;
+  const z = map.getZoom(), size = map.getSize();
+  const pad = 40, inView = p => p.x > -pad && p.y > -pad && p.x < size.x + pad && p.y < size.y + pad;
+  const boxes = [];                                   // occupied screen rectangles [x0,y0,x1,y1]
+  const hit = r => { for (const b of boxes) if (r[0] < b[2] && r[2] > b[0] && r[1] < b[3] && r[3] > b[1]) return true; return false; };
+  // screen areas covered by the map's own controls: top bar, list sheet
+  const sheetTop = size.y - sheetPx(), topBar = 150;
+  const offScreen = r => r[1] < topBar || r[3] > sheetTop || r[0] < 2 || r[2] > size.x - 2;
+
+  // 1) gates and landmarks: fixed in place; hide the ones that would overlap
+  const fixed = [];
+  for (const id in markerById) {
+    const m = markerById[id], f = m._f, el = m.getElement();
+    if (!el || (f.c !== "gate" && f.c !== "landmark")) continue;
+    const tag = el.querySelector(".gp, .lm"); if (!tag) continue;
+    const p = map.latLngToContainerPoint([f.lat, f.lon]);
+    if (!inView(p)) { tag.classList.remove("off"); continue; }
+    const sel = f === selGate;
+    const w = sel ? textW(f.n, GATE_FONT.replace("11px", "14px")) + 18 : f.c === "gate" ? textW(f.n, GATE_FONT) + 12 : textW(f.s, LABEL_FONT) + 14;
+    const h = sel ? 26 : 19;
+    fixed.push({ tag, sel, gate: f.c === "gate", r: [p.x - w / 2 - 2, p.y - h / 2 - 1, p.x + w / 2 + 2, p.y + h / 2 + 1], d: Math.hypot(p.x - size.x / 2, p.y - size.y / 2) });
+  }
+  fixed.sort((a, b) => (b.sel - a.sel) || (b.gate - a.gate) || a.d - b.d);
+  for (const g of fixed) {
+    if (!g.sel && hit(g.r)) { g.tag.classList.add("off"); continue; }
+    g.tag.classList.remove("off"); boxes.push(g.r);
+  }
+
+  // 2) dots: every visible dot reserves its own spot so names don't cover other places
+  const pois = [];
+  for (const id in markerById) {
+    const m = markerById[id], f = m._f, el = m.getElement();
+    if (!el || f.c === "gate" || f.c === "landmark") continue;
+    const lab = el.querySelector(".pl");
+    const p = map.latLngToContainerPoint([f.lat, f.lon]);
+    if (!inView(p)) { if (lab) lab.classList.remove("on"); continue; }
+    boxes.push([p.x - 8, p.y - 8, p.x + 8, p.y + 8]);
+    if (lab) pois.push({ f, m, lab, p });
+  }
+  if (z < 16) { pois.forEach(o => o.lab.classList.remove("on")); return; }
+
+  // 3) names, most useful first
+  const from = origin(), open = map._popup && map._popup.isOpen() ? map._popup._source : null;
+  const c = map.getCenter();
+  pois.forEach(o => {
+    o.pri = o.m === open ? -1e9 : 0;
+    o.pri += from ? meters(from, o.f) : meters({ lat: c.lat, lon: c.lng }, o.f);
+    if (tab !== "all" && o.f.c === tab) o.pri -= 1e6;
+    if (!o.f.n) o.pri += 5e5;                          // unnamed restrooms etc. last
+  });
+  pois.sort((a, b) => a.pri - b.pri);
+  const H = 21, G = 12;   // label height, gap from dot centre
+  for (const o of pois) {
+    // measure the real tag once (fonts differ between devices), capped at 150px
+    if (o.lab._w === undefined) {
+      o.lab.style.visibility = "hidden"; o.lab.style.maxWidth = "150px"; o.lab.classList.add("on");
+      o.lab._w = Math.ceil(o.lab.getBoundingClientRect().width) || Math.min(150, textW(o.lab.textContent, LABEL_FONT) + 16);
+      o.lab.classList.remove("on"); o.lab.style.visibility = "";
+    }
+    const w = o.lab._w, { x, y } = o.p;
+    const spots = [
+      ["r", x + G, y - H / 2], ["l", x - G - w, y - H / 2], ["t", x - w / 2, y - G - H], ["b", x - w / 2, y + G],
+      ["tr", x + G - 4, y - G - H + 4], ["br", x + G - 4, y + G - 4], ["tl", x - G - w + 4, y - G - H + 4], ["bl", x - G - w + 4, y + G - 4],
+    ];
+    let placed = null;
+    for (const [k, lx, ly] of spots) {
+      const r = [lx - 1, ly - 1, lx + w + 1, ly + H + 1];
+      if (!hit(r) && !offScreen(r)) { placed = { lx, ly, r }; break; }
+    }
+    if (!placed) { o.lab.classList.remove("on"); continue; }
+    boxes.push(placed.r);
+    // .pw is the 16px dot box; its top-left sits 8px up-left of the point
+    o.lab.style.left = (placed.lx - (x - 8)) + "px";
+    o.lab.style.top = (placed.ly - (y - 8)) + "px";
+    o.lab.style.maxWidth = w + "px";
+    o.lab.classList.add("on");
+  }
 }
 
 function levelsOf(f) { return f.lv ? String(f.lv).split(/[;,]/).map(s => s.trim()).filter(Boolean) : []; }
@@ -672,6 +767,7 @@ function drawAirport() {
     m.bindPopup(() => popupHtml(f), { maxWidth: 240, offset: [0, -4], autoPanPaddingTopLeft: [10, 170], autoPanPaddingBottomRight: [10, 20] });
     m.on("popupopen", () => drawRoute(f));
     m.on("popupclose", clearRoute);
+    m._f = f;
     markerById[f.id] = m;
   }
   Object.values(layers).forEach(l => l.addTo(map));
@@ -1125,7 +1221,7 @@ function setSheet(st) {
   a.classList.toggle("collapsed", st === "collapsed");
   a.classList.toggle("tall", st === "tall");
   try { localStorage.setItem("sheet", st); } catch {}
-  setTimeout(() => map && map.invalidateSize(), 300);
+  setTimeout(() => { if (map) { map.invalidateSize(); scheduleLabels(); } }, 300);
 }
 (() => {
   const sheet = $("sheet"), a = $("airport");
