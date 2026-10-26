@@ -1,7 +1,7 @@
 {
  "airports": {
   "ABQ": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 24,
     "ground": 48,
@@ -14,11 +14,11 @@
    "walkNodes": 8102
   },
   "ALB": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 15,
     "food": 14,
-    "ground": 33,
+    "ground": 34,
     "restroom": 3,
     "shop": 5
    },
@@ -26,7 +26,7 @@
    "walkNodes": 854
   },
   "AMA": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "restroom": 2,
     "ground": 22,
@@ -36,34 +36,34 @@
    "walkNodes": 188
   },
   "ATL": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 87,
-    "food": 293,
-    "shop": 119,
+    "ground": 88,
+    "food": 295,
+    "shop": 120,
     "gate": 201,
     "restroom": 33,
     "lounge": 22,
     "landmark": 3
    },
    "overture": true,
-   "walkNodes": 2391
+   "walkNodes": 2393
   },
   "AUS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "gate": 40,
-    "restroom": 20,
-    "food": 59,
+    "gate": 37,
+    "restroom": 17,
+    "food": 62,
     "shop": 25,
-    "ground": 46,
+    "ground": 45,
     "lounge": 2
    },
    "overture": true,
-   "walkNodes": 1954
+   "walkNodes": 1931
   },
   "BHM": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 22,
     "gate": 19,
@@ -75,22 +75,22 @@
    "walkNodes": 82
   },
   "BNA": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 51,
+    "ground": 49,
     "gate": 51,
     "restroom": 16,
     "shop": 41,
-    "food": 48,
+    "food": 49,
     "lounge": 6
    },
    "overture": true,
    "walkNodes": 813
   },
   "BOI": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "food": 14,
+    "food": 13,
     "shop": 4,
     "gate": 23,
     "ground": 24,
@@ -116,7 +116,7 @@
    "walkNodes": 5948
   },
   "BUF": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 46,
     "gate": 24,
@@ -129,12 +129,12 @@
    "walkNodes": 886
   },
   "BWI": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 66,
+    "ground": 67,
     "restroom": 22,
-    "food": 71,
-    "shop": 37,
+    "food": 72,
+    "shop": 38,
     "gate": 77,
     "lounge": 6
    },
@@ -142,12 +142,12 @@
    "walkNodes": 1906
   },
   "BZN": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "food": 7,
     "gate": 12,
     "ground": 20,
-    "shop": 3,
+    "shop": 4,
     "restroom": 7
    },
    "overture": true,
@@ -167,10 +167,10 @@
    "walkNodes": 4970
   },
   "CLE": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "food": 41,
-    "shop": 23,
+    "food": 39,
+    "shop": 24,
     "lounge": 4,
     "gate": 49,
     "restroom": 12,
@@ -193,38 +193,38 @@
    "walkNodes": 3122
   },
   "CMH": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 33,
     "shop": 27,
     "landmark": 17,
     "gate": 34,
     "restroom": 7,
-    "food": 38,
+    "food": 37,
     "lounge": 3
    },
    "overture": true,
    "walkNodes": 1734
   },
   "COS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 12,
-    "food": 10,
+    "food": 9,
     "lounge": 1,
-    "ground": 19,
+    "ground": 20,
     "shop": 3,
     "restroom": 5
    },
    "overture": true,
-   "walkNodes": 3245
+   "walkNodes": 3353
   },
   "CVG": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 32,
+    "ground": 33,
     "gate": 47,
-    "food": 39,
+    "food": 40,
     "shop": 29,
     "lounge": 7,
     "restroom": 2,
@@ -234,23 +234,23 @@
    "walkNodes": 2593
   },
   "DAL": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 90,
+    "ground": 89,
     "landmark": 2,
     "gate": 20,
-    "food": 32,
+    "food": 31,
     "shop": 9,
     "restroom": 5,
-    "lounge": 2
+    "lounge": 1
    },
    "overture": true,
    "walkNodes": 4756
   },
   "DCA": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 97,
+    "ground": 99,
     "gate": 59,
     "food": 74,
     "shop": 37,
@@ -262,25 +262,25 @@
    "walkNodes": 2320
   },
   "DEN": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 86,
-    "shop": 124,
-    "food": 163,
+    "shop": 123,
+    "food": 165,
     "restroom": 45,
     "gate": 176,
-    "lounge": 12,
+    "lounge": 13,
     "landmark": 3
    },
    "overture": true,
    "walkNodes": 2844
   },
   "DTW": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 133,
     "restroom": 37,
-    "food": 103,
+    "food": 105,
     "shop": 66,
     "ground": 55,
     "landmark": 1,
@@ -290,10 +290,10 @@
    "walkNodes": 4116
   },
   "ECP": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "restroom": 4,
-    "ground": 19,
+    "ground": 18,
     "gate": 7,
     "food": 4,
     "shop": 1
@@ -302,11 +302,11 @@
    "walkNodes": 408
   },
   "ELP": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 30,
     "gate": 15,
-    "food": 13,
+    "food": 14,
     "shop": 4,
     "lounge": 1
    },
@@ -314,7 +314,7 @@
    "walkNodes": 4590
   },
   "EUG": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 6,
     "ground": 14,
@@ -326,57 +326,57 @@
    "walkNodes": 213
   },
   "FAT": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 14,
+    "ground": 13,
     "landmark": 2,
-    "shop": 2,
-    "food": 4
+    "food": 4,
+    "shop": 2
    },
    "overture": true,
    "walkNodes": 826
   },
   "FLL": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 93,
+    "ground": 92,
     "gate": 67,
     "restroom": 20,
     "food": 69,
-    "shop": 38,
+    "shop": 41,
     "lounge": 5
    },
    "overture": true,
    "walkNodes": 1087
   },
   "GEG": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 18,
     "restroom": 11,
-    "food": 20,
+    "food": 18,
     "shop": 8,
-    "ground": 29,
+    "ground": 30,
     "landmark": 4
    },
    "overture": true,
    "walkNodes": 431
   },
   "GRR": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 35,
     "gate": 23,
     "restroom": 5,
-    "food": 10,
+    "food": 9,
     "shop": 4,
+    "ground": 33,
     "lounge": 1
    },
    "overture": true,
    "walkNodes": 689
   },
   "GSP": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "restroom": 1,
     "food": 13,
@@ -389,7 +389,7 @@
    "walkNodes": 232
   },
   "HDN": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "restroom": 10,
     "gate": 6,
@@ -402,24 +402,24 @@
    "walkNodes": 67
   },
   "HNL": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 59,
-    "food": 54,
+    "food": 55,
     "restroom": 38,
-    "shop": 43,
-    "ground": 63,
-    "lounge": 14
+    "shop": 45,
+    "ground": 64,
+    "lounge": 15
    },
    "overture": true,
    "walkNodes": 2840
   },
   "HOU": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 30,
     "ground": 46,
-    "food": 22,
+    "food": 24,
     "shop": 15,
     "restroom": 3,
     "lounge": 2
@@ -428,19 +428,19 @@
    "walkNodes": 1128
   },
   "HRL": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 7,
     "ground": 6,
-    "food": 3
+    "food": 2
    },
    "overture": true,
    "walkNodes": 86
   },
   "ICT": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 36,
+    "ground": 35,
     "gate": 11,
     "food": 4
    },
@@ -448,13 +448,13 @@
    "walkNodes": 2313
   },
   "IND": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 37,
+    "ground": 38,
     "gate": 40,
     "landmark": 4,
-    "food": 32,
-    "shop": 30,
+    "food": 33,
+    "shop": 28,
     "restroom": 19,
     "lounge": 2
    },
@@ -462,9 +462,9 @@
    "walkNodes": 825
   },
   "ISP": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 34,
+    "ground": 35,
     "gate": 12,
     "restroom": 4,
     "shop": 3,
@@ -475,7 +475,7 @@
    "walkNodes": 1781
   },
   "JAN": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 8,
     "shop": 1,
@@ -487,58 +487,59 @@
    "walkNodes": 414
   },
   "KOA": {
-   "generated": "2026-10-13T20:01:21.150Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 13,
     "shop": 12,
     "restroom": 5,
-    "ground": 13,
+    "ground": 14,
     "landmark": 2,
-    "food": 5
+    "food": 5,
+    "lounge": 1
    },
    "overture": true,
    "walkNodes": 646
   },
   "LAS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 222,
+    "ground": 224,
     "shop": 124,
     "gate": 110,
-    "food": 134,
+    "food": 138,
     "restroom": 37,
-    "lounge": 18
+    "lounge": 21
    },
    "overture": true,
-   "walkNodes": 8820
+   "walkNodes": 8822
   },
   "LAX": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 223,
+    "ground": 225,
     "gate": 148,
     "restroom": 42,
-    "shop": 141,
-    "food": 151,
-    "lounge": 39,
+    "shop": 143,
+    "food": 150,
+    "lounge": 40,
     "landmark": 1
    },
    "overture": true,
    "walkNodes": 5412
   },
   "LBB": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 9,
-    "ground": 11,
-    "food": 4,
+    "ground": 12,
+    "food": 3,
     "shop": 1
    },
    "overture": true,
    "walkNodes": 41
   },
   "LGA": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 85,
     "restroom": 20,
@@ -551,7 +552,7 @@
    "walkNodes": 3074
   },
   "LGB": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 64,
     "restroom": 4,
@@ -564,30 +565,30 @@
    "walkNodes": 1138
   },
   "LIT": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "food": 6,
     "gate": 12,
     "restroom": 1,
-    "ground": 18,
-    "lounge": 1,
-    "shop": 1
+    "ground": 19,
+    "shop": 1,
+    "lounge": 1
    },
    "overture": true,
    "walkNodes": 189
   },
   "MAF": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 14,
     "gate": 5,
-    "food": 2
+    "food": 1
    },
    "overture": true,
    "walkNodes": 105
   },
   "MCI": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 40,
     "shop": 23,
@@ -600,24 +601,24 @@
    "walkNodes": 838
   },
   "MCO": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "gate": 109,
-    "food": 91,
-    "ground": 114,
+    "gate": 114,
+    "food": 90,
+    "ground": 119,
     "restroom": 20,
     "shop": 54,
     "lounge": 14
    },
    "overture": true,
-   "walkNodes": 4266
+   "walkNodes": 4656
   },
   "MEM": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 31,
     "gate": 60,
-    "food": 16,
+    "food": 15,
     "shop": 10,
     "lounge": 1
    },
@@ -650,14 +651,14 @@
    "walkNodes": 5056
   },
   "MKE": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 43,
+    "ground": 44,
     "gate": 48,
     "restroom": 11,
     "landmark": 17,
-    "shop": 3,
-    "food": 20,
+    "shop": 4,
+    "food": 18,
     "lounge": 2
    },
    "overture": true,
@@ -678,9 +679,9 @@
    "walkNodes": 4694
   },
   "MSY": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 38,
+    "ground": 39,
     "gate": 35,
     "restroom": 20,
     "food": 36,
@@ -691,11 +692,11 @@
    "walkNodes": 571
   },
   "MTJ": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 16,
     "food": 4,
-    "shop": 3,
+    "shop": 2,
     "gate": 7,
     "restroom": 2
    },
@@ -703,7 +704,7 @@
    "walkNodes": 195
   },
   "MYR": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 13,
     "ground": 18,
@@ -714,23 +715,23 @@
    "walkNodes": 1495
   },
   "OAK": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "landmark": 2,
     "gate": 29,
-    "food": 30,
+    "food": 28,
     "shop": 13,
     "lounge": 2,
     "restroom": 11,
-    "ground": 71
+    "ground": 73
    },
    "overture": true,
    "walkNodes": 5569
   },
   "OGG": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 36,
+    "ground": 35,
     "food": 10,
     "restroom": 8,
     "gate": 16,
@@ -741,35 +742,36 @@
    "walkNodes": 174
   },
   "OKC": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 21,
     "restroom": 4,
-    "food": 14,
+    "food": 13,
     "shop": 20,
     "ground": 26,
-    "lounge": 1
+    "lounge": 2
    },
    "overture": true,
    "walkNodes": 794
   },
   "OMA": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 19,
     "food": 14,
     "shop": 7,
     "ground": 33,
-    "restroom": 1
+    "restroom": 1,
+    "lounge": 1
    },
    "overture": true,
    "walkNodes": 280
   },
   "ONT": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 37,
-    "food": 23,
+    "food": 22,
     "gate": 27,
     "restroom": 13,
     "shop": 11,
@@ -780,13 +782,13 @@
    "walkNodes": 768
   },
   "ORF": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 36,
+    "ground": 35,
     "landmark": 2,
     "restroom": 5,
     "gate": 27,
-    "food": 16,
+    "food": 15,
     "shop": 8,
     "lounge": 2
    },
@@ -794,13 +796,13 @@
    "walkNodes": 1894
   },
   "PDX": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 53,
-    "food": 65,
+    "food": 62,
     "restroom": 19,
     "shop": 46,
-    "lounge": 6,
+    "lounge": 7,
     "ground": 54,
     "landmark": 2
    },
@@ -808,33 +810,33 @@
    "walkNodes": 1888
   },
   "PHL": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 67,
+    "ground": 68,
     "gate": 127,
     "restroom": 22,
-    "food": 116,
-    "shop": 69,
-    "lounge": 9
+    "food": 113,
+    "shop": 67,
+    "lounge": 10
    },
    "overture": true,
    "walkNodes": 2170
   },
   "PIT": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 55,
     "food": 37,
-    "shop": 32,
+    "shop": 34,
     "restroom": 8,
-    "ground": 35,
-    "lounge": 3
+    "ground": 41,
+    "lounge": 4
    },
    "overture": true,
    "walkNodes": 1811
   },
   "PNS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 10,
     "restroom": 2,
@@ -847,7 +849,7 @@
    "walkNodes": 2723
   },
   "PSP": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 16,
     "shop": 7,
@@ -860,7 +862,7 @@
    "walkNodes": 3847
   },
   "PVD": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 34,
     "gate": 24,
@@ -873,7 +875,7 @@
    "walkNodes": 944
   },
   "PWM": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "food": 6,
     "gate": 11,
@@ -885,20 +887,20 @@
    "walkNodes": 1194
   },
   "RIC": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 24,
+    "ground": 25,
     "shop": 4,
     "restroom": 12,
     "gate": 28,
-    "food": 9,
+    "food": 8,
     "lounge": 1
    },
    "overture": true,
    "walkNodes": 550
   },
   "RNO": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 45,
     "gate": 23,
@@ -912,7 +914,7 @@
    "walkNodes": 2945
   },
   "ROC": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 21,
     "shop": 7,
@@ -923,27 +925,26 @@
    "walkNodes": 798
   },
   "RSW": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 38,
     "gate": 28,
     "shop": 30,
     "restroom": 13,
     "food": 21,
-    "landmark": 3,
-    "lounge": 1
+    "landmark": 3
    },
    "overture": true,
    "walkNodes": 1066
   },
   "SAN": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 54,
     "restroom": 22,
-    "food": 65,
-    "shop": 57,
-    "ground": 251,
+    "food": 64,
+    "shop": 55,
+    "ground": 254,
     "lounge": 7
    },
    "overture": true,
@@ -963,7 +964,7 @@
    "walkNodes": 262
   },
   "SBA": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 29,
     "restroom": 6,
@@ -976,25 +977,25 @@
    "walkNodes": 3010
   },
   "SDF": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 23,
     "shop": 42,
     "food": 18,
     "restroom": 12,
     "landmark": 31,
-    "ground": 68,
+    "ground": 69,
     "lounge": 2
    },
    "overture": true,
    "walkNodes": 95
   },
   "SEA": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "food": 111,
-    "shop": 70,
-    "ground": 85,
+    "food": 110,
+    "shop": 71,
+    "ground": 86,
     "gate": 103,
     "restroom": 52,
     "lounge": 11
@@ -1003,23 +1004,23 @@
    "walkNodes": 2607
   },
   "SFO": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 119,
+    "ground": 120,
     "gate": 119,
     "restroom": 100,
-    "shop": 107,
+    "shop": 109,
     "food": 106,
     "landmark": 16,
-    "lounge": 23
+    "lounge": 28
    },
    "overture": true,
    "walkNodes": 3122
   },
   "SJC": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 120,
+    "ground": 119,
     "gate": 37,
     "food": 37,
     "shop": 24,
@@ -1031,35 +1032,35 @@
    "walkNodes": 5082
   },
   "SJU": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 48,
-    "shop": 34,
+    "ground": 51,
+    "shop": 33,
     "food": 31,
     "gate": 35,
-    "lounge": 7,
+    "lounge": 8,
     "restroom": 7
    },
    "overture": true,
    "walkNodes": 493
   },
   "SLC": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "food": 64,
+    "food": 63,
     "restroom": 29,
     "gate": 87,
-    "shop": 54,
-    "ground": 41,
-    "lounge": 3
+    "shop": 53,
+    "ground": 46,
+    "lounge": 4
    },
    "overture": true,
    "walkNodes": 989
   },
   "SMF": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 30,
+    "ground": 31,
     "gate": 34,
     "landmark": 1,
     "food": 44,
@@ -1071,7 +1072,7 @@
    "walkNodes": 1282
   },
   "SRQ": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 18,
     "food": 13,
@@ -1084,30 +1085,30 @@
    "walkNodes": 1566
   },
   "STL": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 46,
+    "ground": 48,
     "restroom": 18,
     "gate": 54,
-    "food": 57,
-    "shop": 36,
-    "lounge": 4
+    "food": 53,
+    "shop": 38,
+    "lounge": 5
    },
    "overture": true,
    "walkNodes": 5343
   },
   "STS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "food": 7,
     "restroom": 11,
     "gate": 8,
     "landmark": 2,
-    "ground": 21,
+    "ground": 20,
     "shop": 2
    },
    "overture": true,
-   "walkNodes": 740
+   "walkNodes": 742
   },
   "STT": {
    "generated": "2026-10-19T08:07:18.700Z",
@@ -1119,20 +1120,21 @@
    "walkNodes": 142
   },
   "TPA": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 124,
-    "food": 51,
+    "ground": 126,
+    "food": 50,
     "gate": 60,
     "lounge": 9,
     "restroom": 5,
-    "shop": 27
+    "shop": 28,
+    "landmark": 1
    },
    "overture": true,
-   "walkNodes": 3320
+   "walkNodes": 3321
   },
   "TUS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 21,
     "food": 15,
@@ -1140,13 +1142,13 @@
     "shop": 5,
     "restroom": 8,
     "landmark": 1,
-    "lounge": 1
+    "lounge": 2
    },
    "overture": true,
    "walkNodes": 2545
   },
   "TYS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "food": 7,
     "shop": 2,
@@ -1159,7 +1161,7 @@
    "walkNodes": 178
   },
   "VPS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 14,
     "ground": 9,
@@ -1170,101 +1172,101 @@
    "walkNodes": 114
   },
   "DFW": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 133,
+    "ground": 134,
     "gate": 168,
-    "food": 218,
-    "shop": 111,
+    "food": 219,
+    "shop": 112,
     "landmark": 7,
     "restroom": 71,
-    "lounge": 28
+    "lounge": 30
    },
    "overture": true,
    "walkNodes": 5402
   },
   "EWR": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 95,
+    "ground": 97,
     "gate": 101,
-    "shop": 83,
+    "shop": 84,
     "food": 151,
     "restroom": 15,
     "landmark": 1,
-    "lounge": 14
+    "lounge": 15
    },
    "overture": true,
    "walkNodes": 1601
   },
   "IAD": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 86,
     "gate": 130,
     "food": 97,
-    "shop": 68,
+    "shop": 69,
     "restroom": 29,
-    "lounge": 25
+    "lounge": 27
    },
    "overture": true,
    "walkNodes": 8500
   },
   "JFK": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 115,
+    "ground": 119,
     "gate": 136,
-    "food": 161,
-    "shop": 157,
+    "food": 163,
+    "shop": 159,
     "restroom": 36,
-    "lounge": 35
+    "lounge": 37
    },
    "overture": true,
    "walkNodes": 6692
   },
   "ORD": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 166,
+    "ground": 167,
     "gate": 215,
-    "food": 156,
+    "food": 160,
     "restroom": 111,
-    "shop": 153,
-    "lounge": 24,
+    "shop": 152,
+    "lounge": 25,
     "landmark": 37
    },
    "overture": true,
-   "walkNodes": 6992
+   "walkNodes": 7186
   },
   "NAS": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 13,
     "gate": 17,
     "shop": 11,
     "food": 13,
     "restroom": 7,
-    "lounge": 2
+    "lounge": 3
    },
    "overture": true,
    "walkNodes": 129
   },
   "BZE": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "shop": 13,
     "food": 11,
     "restroom": 1,
     "gate": 12,
-    "ground": 15,
+    "ground": 16,
     "landmark": 2
    },
    "overture": true,
    "walkNodes": 68
   },
   "GCM": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 31,
     "shop": 7,
@@ -1276,19 +1278,19 @@
    "walkNodes": 0
   },
   "LIR": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 21,
+    "ground": 24,
     "food": 5,
     "gate": 4,
     "restroom": 1,
-    "shop": 4
+    "shop": 5
    },
    "overture": true,
    "walkNodes": 25
   },
   "HAV": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 31,
     "gate": 12,
@@ -1301,10 +1303,10 @@
    "walkNodes": 80
   },
   "MBJ": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "food": 10,
-    "ground": 18,
+    "ground": 20,
     "shop": 6,
     "restroom": 3,
     "gate": 7,
@@ -1314,25 +1316,25 @@
    "walkNodes": 235
   },
   "CUN": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "food": 47,
-    "shop": 39,
+    "shop": 42,
     "restroom": 3,
     "gate": 60,
     "ground": 79,
-    "lounge": 9
+    "lounge": 10
    },
    "overture": true,
    "walkNodes": 259
   },
   "PVR": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 36,
     "food": 18,
     "gate": 20,
-    "shop": 9,
+    "shop": 10,
     "lounge": 4
    },
    "overture": true,
@@ -1352,7 +1354,7 @@
    "walkNodes": 25
   },
   "PLS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 10,
     "food": 2,
@@ -1375,68 +1377,68 @@
    "walkNodes": 7396
   },
   "FRA": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 160,
+    "ground": 164,
     "gate": 121,
     "restroom": 96,
-    "shop": 203,
-    "food": 148,
-    "lounge": 37,
+    "shop": 210,
+    "food": 153,
+    "lounge": 35,
     "landmark": 1
    },
    "overture": true,
-   "walkNodes": 4559
+   "walkNodes": 4556
   },
   "FCO": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 127,
+    "ground": 129,
     "gate": 65,
-    "food": 82,
-    "shop": 145,
+    "food": 80,
+    "shop": 144,
     "restroom": 17,
-    "lounge": 16
+    "lounge": 18
    },
    "overture": true,
    "walkNodes": 685
   },
   "LHR": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "food": 155,
+    "food": 161,
     "gate": 148,
     "landmark": 3,
-    "ground": 231,
+    "ground": 258,
     "restroom": 52,
-    "lounge": 79,
-    "shop": 326
+    "lounge": 81,
+    "shop": 331
    },
    "overture": true,
    "walkNodes": 6373
   },
   "DUB": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 83,
+    "ground": 85,
     "restroom": 28,
     "gate": 86,
-    "food": 71,
-    "shop": 55,
+    "food": 72,
+    "shop": 57,
     "landmark": 1,
-    "lounge": 9
+    "lounge": 10
    },
    "overture": true,
    "walkNodes": 915
   },
   "MXP": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 106,
+    "ground": 108,
     "gate": 69,
     "restroom": 16,
     "shop": 97,
-    "food": 59,
+    "food": 57,
     "lounge": 14,
     "landmark": 1
    },
@@ -1444,52 +1446,52 @@
    "walkNodes": 935
   },
   "LIN": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 95,
-    "food": 27,
-    "shop": 24,
+    "ground": 94,
+    "food": 24,
+    "shop": 26,
     "restroom": 1,
     "gate": 18,
-    "lounge": 5
+    "lounge": 6
    },
    "overture": true,
    "walkNodes": 4302
   },
   "EDI": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 96,
+    "ground": 97,
     "food": 33,
     "gate": 28,
     "restroom": 10,
     "shop": 45,
-    "lounge": 11,
+    "lounge": 10,
     "landmark": 1
    },
    "overture": true,
    "walkNodes": 1875
   },
   "BCN": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 125,
-    "ground": 105,
-    "food": 97,
+    "ground": 110,
+    "food": 101,
     "shop": 101,
     "restroom": 35,
     "landmark": 3,
     "lounge": 9
    },
    "overture": true,
-   "walkNodes": 4833
+   "walkNodes": 4851
   },
   "ANC": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 36,
+    "ground": 35,
     "gate": 36,
-    "food": 28,
+    "food": 26,
     "shop": 22,
     "restroom": 6,
     "lounge": 3
@@ -1509,20 +1511,20 @@
    "walkNodes": 981
   },
   "BUR": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 43,
-    "gate": 14,
+    "ground": 46,
+    "gate": 28,
     "restroom": 8,
-    "shop": 20,
-    "food": 31,
-    "lounge": 2
+    "shop": 23,
+    "food": 29,
+    "lounge": 1
    },
    "overture": true,
-   "walkNodes": 1153
+   "walkNodes": 1253
   },
   "DSM": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 26,
     "restroom": 4,
@@ -1532,12 +1534,12 @@
     "lounge": 1
    },
    "overture": true,
-   "walkNodes": 698
+   "walkNodes": 699
   },
   "ITO": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 25,
+    "ground": 27,
     "gate": 7,
     "restroom": 10,
     "food": 2,
@@ -1547,9 +1549,9 @@
    "walkNodes": 263
   },
   "LIH": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 22,
+    "ground": 23,
     "gate": 8,
     "landmark": 1,
     "food": 9,
@@ -1561,38 +1563,38 @@
    "walkNodes": 97
   },
   "MDW": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 43,
     "food": 47,
     "shop": 31,
     "restroom": 24,
     "ground": 55,
-    "lounge": 3
+    "lounge": 4
    },
    "overture": true,
    "walkNodes": 4788
   },
   "PHX": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 131,
     "gate": 111,
-    "food": 109,
+    "food": 107,
     "restroom": 19,
     "shop": 57,
-    "lounge": 14
+    "lounge": 13
    },
    "overture": true,
    "walkNodes": 4083
   },
   "RDU": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 45,
     "restroom": 16,
     "shop": 24,
-    "food": 29,
+    "food": 28,
     "ground": 29,
     "lounge": 2
    },
@@ -1600,7 +1602,7 @@
    "walkNodes": 1624
   },
   "SAT": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 71,
     "gate": 28,
@@ -1610,52 +1612,52 @@
     "lounge": 2
    },
    "overture": true,
-   "walkNodes": 4511
+   "walkNodes": 4513
   },
   "TUL": {
-   "generated": "2026-10-13T18:40:21.162Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 22,
     "restroom": 6,
     "shop": 9,
-    "food": 17,
-    "lounge": 2,
+    "food": 16,
+    "lounge": 1,
     "ground": 42
    },
    "overture": true,
-   "walkNodes": 761
+   "walkNodes": 835
   },
   "IAH": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "ground": 81,
-    "gate": 147,
-    "food": 176,
-    "shop": 131,
+    "gate": 169,
+    "food": 177,
+    "shop": 133,
     "restroom": 41,
-    "lounge": 26
+    "lounge": 28
    },
    "overture": true,
    "walkNodes": 1433
   },
   "AUA": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 65,
+    "ground": 64,
     "gate": 8,
     "food": 14,
-    "lounge": 2,
-    "shop": 4
+    "lounge": 3,
+    "shop": 5
    },
    "overture": true,
    "walkNodes": 239
   },
   "SJO": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 113,
+    "ground": 117,
     "gate": 19,
-    "shop": 11,
+    "shop": 12,
     "restroom": 3,
     "food": 20,
     "lounge": 6
@@ -1664,11 +1666,11 @@
    "walkNodes": 145
   },
   "PUJ": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 28,
     "shop": 7,
-    "food": 18,
+    "food": 19,
     "ground": 18,
     "lounge": 3
    },
@@ -1676,9 +1678,9 @@
    "walkNodes": 22
   },
   "SXM": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 34,
+    "ground": 35,
     "gate": 4,
     "food": 7,
     "restroom": 1,
@@ -1689,22 +1691,22 @@
    "walkNodes": 208
   },
   "AMS": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 198,
+    "ground": 225,
     "gate": 140,
-    "shop": 152,
+    "shop": 154,
     "food": 140,
     "restroom": 39,
-    "lounge": 18
+    "lounge": 21
    },
    "overture": true,
-   "walkNodes": 13302
+   "walkNodes": 13303
   },
   "BER": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 84,
+    "ground": 83,
     "gate": 44,
     "shop": 39,
     "lounge": 8,
@@ -1715,14 +1717,14 @@
    "walkNodes": 4099
   },
   "MUC": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
-    "ground": 105,
+    "ground": 107,
     "gate": 165,
     "restroom": 44,
-    "shop": 93,
-    "food": 97,
-    "lounge": 22
+    "shop": 94,
+    "food": 99,
+    "lounge": 23
    },
    "overture": true,
    "walkNodes": 1778
@@ -1738,13 +1740,13 @@
    "walkNodes": 0
   },
   "JAX": {
-   "generated": "2026-10-19T08:07:18.700Z",
+   "generated": "2026-10-26T08:15:17.089Z",
    "counts": {
     "gate": 20,
     "restroom": 15,
-    "food": 21,
+    "food": 19,
     "shop": 13,
-    "ground": 41,
+    "ground": 42,
     "lounge": 2
    },
    "overture": true,
@@ -1764,23 +1766,22 @@
    "walkNodes": 2636
   }
  },
- "generated": "2026-10-19T08:07:18.700Z",
- "overtureRelease": "2026-09-23.1",
+ "generated": "2026-10-26T08:15:17.089Z",
+ "overtureRelease": "2026-10-21.0",
  "failed": [
-  "AMA",
-  "BUF",
-  "BUR",
-  "DEN",
-  "ITO",
-  "KOA",
-  "LGB",
+  "BDL",
+  "BOS",
+  "CHS",
+  "CLT",
+  "CRP",
   "MHT",
-  "ORF",
+  "MIA",
+  "MSP",
   "PBI",
-  "PDX",
+  "SAV",
   "SNA",
-  "TUL",
-  "NAS",
+  "STT",
+  "SJD",
   "CDG"
  ]
 }
